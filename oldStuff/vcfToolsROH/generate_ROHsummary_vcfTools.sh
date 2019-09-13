@@ -1,0 +1,1 @@
+awk '$6 > 49 {print $0}' allSpecies_jointcalled_chr*_vcfTools.LROH | grep -v "CHROM" | sed 1i'CHROM\tAUTO_START\tAUTO_END\tMIN_START\tMAX_END\tN_VARIANTS_BETWEEN_MAX_BOUNDARIES\tN_MISMATCHES\tINDV' > allSpecies_allChroms_vcfToolsROH_rmROHlessThan50snps.txt
