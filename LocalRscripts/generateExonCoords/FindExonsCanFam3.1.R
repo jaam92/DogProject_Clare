@@ -1,0 +1,25 @@
+##This script will grab Exons from ensembl
+
+#Load Libraries
+library(dplyr)
+library(tidyr)
+
+####Read files in
+setwd("~/DogProject_Clare/generateExonCoords")
+genes = read.delim("~/DogProject_Clare/generateExonCoords/EnsemblGenes_CanFam3.1.bed", check.names = F)
+gene_names = read.table("~/DogProject_Clare/generateExonCoords/EnsemblGenes_CanFam3.1_geneNames.txt")
+
+###Add gene name -> calculate transcript length -> keep only longest transcript -> keep autosomal -> parse exons
+GeneSet = genes %>% 
+  mutate(chrom = gsub("chr", "", chrom), AbbrevName = gene_names$V2[match(name, gene_names$V1)], transcript_length = transcriptionEnd - transcriptionStart) %>% 
+  group_by(AbbrevName) %>% 
+  filter(transcript_length == max(transcript_length) & as.numeric(chrom) <= 38) %>% 
+  distinct(AbbrevName,.keep_all= TRUE) %>% 
+  separate_rows(exonStarts, exonEnds) %>% 
+  mutate(CHROM = sub("^", "chr", chrom)) %>%
+  select(CHROM, transcriptionStart, transcriptionEnd, transcript_length, codingRegionStart, codingRegionEnd, exonStarts, exonEnds, name, AbbrevName) %>%
+  as.data.frame()
+
+FinalGeneSet = GeneSet[!(GeneSet$exonStarts == ""),] #remove empty rows generated from separate rows
+
+write.table(FinalGeneSet, "EnsemblGenes_CanFam3.1_SingleTranscript.bed", sep = "\t", quote = F, row.names = F, col.names = T)
