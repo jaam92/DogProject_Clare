@@ -1,12 +1,12 @@
 ##This script will grab Exons from ensembl
-
+###Generated Ensembl data by downloading exons from UCSC as bed file using protocol from Tanya(https://github.com/tanyaphung/SexBiased/tree/master/filter_nucleotide_sites)
 #Load Libraries
 library(dplyr)
 library(tidyr)
 
 ####Read files in
 setwd("~/DogProject_Clare/generateExonCoords")
-genes = read.delim("~/DogProject_Clare/generateExonCoords/EnsemblGenes_CanFam3.1.bed", check.names = F)
+genes = read.delim("~/DogProject_Clare/generateExonCoords/EnsemblGenes_CanFam3.1.bed", check.names = F) #come from UCSC table browser (downloaded as bed)
 gene_names = read.table("~/DogProject_Clare/generateExonCoords/EnsemblGenes_CanFam3.1_geneNames.txt")
 
 ###Add gene name -> calculate transcript length -> keep only longest transcript -> keep autosomal -> parse exons
