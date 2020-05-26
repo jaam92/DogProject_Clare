@@ -71,12 +71,27 @@ Top200_Pi = results %>%
   filter(SummaryStat == "piPerBin") %>%
   top_n(-200, jointScore)
 
+####Generate high density regions and compute credible intervals and find mode 
+#If you do not supply the density of the parameter this package will smooth the posterior using default density otherwise it will use kernel density estimation with it's own algorithm where the default kernel bandwidth h is selected using the algorithm of Samworth and Wand (2010)
+cols = c('SimNeOne','SimNeTwo','SimNeThree','SimTimeOne', 'SimTimeTwo')
+credibleIntervals = data.frame()
+
+for (Param in cols) {
+  df = hdr(x = Top200[,Param], prob = c(95), den = density(Top200[,Param]))
+  ParamCredInt = cbind.data.frame(Param, trunc(df$mode), trunc(df$hdr))
+  hdr.den(x = Top200[,Param], prob = c(95), den = density(Top200[,Param]))
+  credibleIntervals = rbind.data.frame(credibleIntervals, ParamCredInt)
+}
+
+x = grid.table(credibleIntervals)
+
 #Function to estimate the mode as the maximum of the density
-modePosteriorNe1 = trunc(hdr.den(Top200$SimNeOne)$mode)
-modePosteriorNe2 = trunc(hdr.den(Top200$SimNeTwo)$mode)
-modePosteriorNe3 = trunc(hdr.den(Top200$SimNeThree)$mode)
-modePosteriorTbot1 = trunc(hdr.den(Top200$SimTimeOne)$mode)
-modePosteriorTbot2 = trunc(hdr.den(Top200$SimTimeTwo)$mode)
+#By suppl
+modePosteriorNe1 = trunc(hdr(Top200$SimNeOne, prob = c(95), den = density(Top200$SimNeOne))$mode)
+modePosteriorNe2 = trunc(hdr(Top200$SimNeTwo, prob = c(95), den = density(Top200$SimNeTwo))$mode)
+modePosteriorNe3 = trunc(hdr(Top200$SimNeThree, prob = c(95), den = density(Top200$SimNeThree))$mode)
+modePosteriorTbot1 = trunc(hdr(Top200$SimTimeOne, prob = c(95), den = density(Top200$SimTimeOne))$mode)
+modePosteriorTbot2 = trunc(hdr(Top200$SimTimeTwo, prob = c(95), den = density(Top200$SimTimeTwo))$mode)
 
 #Plotting Function for posterior
 plotPosterior <- function(title, xAxisTitle, parameterPrior, colorPrior, parameterPosterior, colorPosterior, modePosterior ){
@@ -336,7 +351,7 @@ ABCandDemog = ggarrange(DemographicModel, VisualizeABC + theme(legend.position =
                         labels = c("A","B"),
                         align = 'v')
 
-#Option 1 to generate an hpd set of level p, based on a sample x from the posterior
+#Option 2 to generate an hpd set of level p, based on a sample x from the posterior
 
 #hpd<-function(x,p){
 #  dx<-density(x)
@@ -348,18 +363,3 @@ ABCandDemog = ggarrange(DemographicModel, VisualizeABC + theme(legend.position =
 #}
 #hpd(Top200$SimNeOne, 0.95)
 
-#Option 1 to generate high density regions
-#If you do not supply the density of the parameter this package will smooth the posterior 
-library(hdrcde)
-library(gridExtra)
-cols = c('SimNeOne','SimNeTwo','SimNeThree','SimTimeOne', 'SimTimeTwo')
-credibleIntervals = data.frame()
-
-for (Param in cols) {
-  df = hdr(x = Top200[,Param], prob = c(95), den = density(Top200[,Param]))
-  ParamCredInt = cbind.data.frame(Param, trunc(df$mode), trunc(df$hdr))
-  hdr.den(x = Top200[,Param], prob = c(95), den = density(Top200[,Param]))
-  credibleIntervals = rbind.data.frame(credibleIntervals, ParamCredInt)
-}
-
-x = grid.table(credibleIntervals)
