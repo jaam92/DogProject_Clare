@@ -1,12 +1,12 @@
 #Set Libraries and working directory
-library(data.table)
 library(tidyverse)
+library(data.table)
 library(hdrcde)
 library(ggpubr)
 
 #Plot the priors
 set.seed(2)
-samps = seq(1:100000)
+samps = seq(1:10000)
 Ne1 = runif(samps, min = 10, max = 1000)
 Ne2 = runif(samps, min = 1000, max = 60000)
 Ne3 = runif(samps, min = 40000, max = 100000)
@@ -17,7 +17,7 @@ sampPriors = cbind.data.frame(samps,Ne1,Ne2,Ne3,Tbot,Tbot2)
 #Plotting Function for priors
 plotPrior <- function(xAxisTitle, title, parameter, color){
   ggplot() + 
-    geom_density(aes(x=parameter), colour=color) + 
+    geom_density(aes(x=parameter), colour=color, outline.type = "full") + 
     ggtitle(title) + 
     xlab(xAxisTitle) + 
     theme_bw() + 
@@ -87,13 +87,6 @@ credibleIntervals$Param = c("Ancient Ne", "Ancient Bottleneck", "Intermidiate Ne
 
 gridExtra::grid.table(credibleIntervals, cols = c("Parameter", "Mode", "Lower Bound (95% CI)", "Upper Bound (95% CI)"), rows = NULL)
 
-#Function to estimate the mode as the maximum of the density
-#By suppl
-modePosteriorNe1 = trunc(hdr(Top200$SimNeOne, prob = c(95), den = density(Top200$SimNeOne))$mode)
-modePosteriorNe2 = trunc(hdr(Top200$SimNeTwo, prob = c(95), den = density(Top200$SimNeTwo))$mode)
-modePosteriorNe3 = trunc(hdr(Top200$SimNeThree, prob = c(95), den = density(Top200$SimNeThree))$mode)
-modePosteriorTbot1 = trunc(hdr(Top200$SimTimeOne, prob = c(95), den = density(Top200$SimTimeOne))$mode)
-modePosteriorTbot2 = trunc(hdr(Top200$SimTimeTwo, prob = c(95), den = density(Top200$SimTimeTwo))$mode)
 
 #Plotting Function for posterior
 plotPosterior <- function(title, xAxisTitle, parameterPrior, colorPrior, parameterPosterior, colorPosterior, modePosterior ){
@@ -110,15 +103,15 @@ plotPosterior <- function(title, xAxisTitle, parameterPrior, colorPrior, paramet
           plot.title = element_text(size=24, hjust = 0.5, face = "bold"))
 }
 
-plotPosteriorNe1 = plotPosterior(paste("Mode of Posterior = ", modePosteriorNe1), expression(paste(Ne[Current])), sampPriors$Ne1, "blue", Top200$SimNeOne, "black", modePosteriorNe1)
+plotPosteriorNe1 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[5,2]), expression(paste(Ne[Current])), sampPriors$Ne1, "blue", Top200$SimNeOne, "black", credibleIntervals[5,2])
 
-plotPosteriorNe2 = plotPosterior(paste("Mode of Posterior = ", modePosteriorNe2), expression(paste(Ne[2])), sampPriors$Ne2, "blue", Top200$SimNeTwo, "black", modePosteriorNe2)
+plotPosteriorNe2 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[3,2]), expression(paste(Ne[2])), sampPriors$Ne2, "blue", Top200$SimNeTwo, "black", credibleIntervals[3,2])
 
-plotPosteriorNe3 = plotPosterior(paste("Mode of Posterior = ", modePosteriorNe3), expression(paste(Ne[3])), sampPriors$Ne3, "blue", Top200$SimNeThree, "black", modePosteriorNe3)
+plotPosteriorNe3 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[1,2]), expression(paste(Ne[3])), sampPriors$Ne3, "blue", Top200$SimNeThree, "black", credibleIntervals[1,2])
 
-plotPosteriorTbot1 = plotPosterior(paste("Mode of Posterior = ", modePosteriorTbot1), expression(paste(T[bottleneck])), sampPriors$Tbot, "blue", Top200$SimTimeOne, "black", modePosteriorTbot1)
+plotPosteriorTbot1 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[4,2]), expression(paste(T[bottleneck])), sampPriors$Tbot, "blue", Top200$SimTimeOne, "black", credibleIntervals[4,2])
 
-plotPosteriorTbot2 = plotPosterior(paste("Mode of Posterior = ", modePosteriorTbot2), expression(paste(T[bottleneck2])), sampPriors$Tbot2, "blue", Top200$SimTimeTwo, "black", modePosteriorTbot2)
+plotPosteriorTbot2 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[2,2]), expression(paste(T[bottleneck2])), sampPriors$Tbot2, "blue", Top200$SimTimeTwo, "black", credibleIntervals[2,2])
 
 plotPosteriorTogether = ggarrange(plotPosteriorNe1  + ylab(""),
                                   plotPosteriorTbot1  + ylab(""), 
