@@ -1,6 +1,7 @@
 #Set Libraries and working directory
 library(data.table)
 library(tidyverse)
+library(hdrcde)
 library(ggpubr)
 
 #Plot the priors
@@ -71,23 +72,18 @@ Top200_Pi = results %>%
   top_n(-200, jointScore)
 
 #Function to estimate the mode as the maximum of the density
-estimate_mode <- function(s) {
-  d <- density(s)
-  trunc(d$x[which.max(d$y)])
-}
-
-modePosteriorNe1 = estimate_mode(Top200$SimNeOne)
-modePosteriorNe2 = estimate_mode(Top200$SimNeTwo)
-modePosteriorNe3 = estimate_mode(Top200$SimNeThree)
-modePosteriorTbot1 = estimate_mode(Top200$SimTimeOne)
-modePosteriorTbot2 = estimate_mode(Top200$SimTimeTwo)
+modePosteriorNe1 = trunc(hdr.den(Top200$SimNeOne)$mode)
+modePosteriorNe2 = trunc(hdr.den(Top200$SimNeTwo)$mode)
+modePosteriorNe3 = trunc(hdr.den(Top200$SimNeThree)$mode)
+modePosteriorTbot1 = trunc(hdr.den(Top200$SimTimeOne)$mode)
+modePosteriorTbot2 = trunc(hdr.den(Top200$SimTimeTwo)$mode)
 
 #Plotting Function for posterior
 plotPosterior <- function(title, xAxisTitle, parameterPrior, colorPrior, parameterPosterior, colorPosterior, modePosterior ){
   ggplot() + 
-    geom_density(data=sampPriors, aes(x=parameterPrior), colour=colorPrior,size=1) +
-    geom_density(data=Top200, aes(x=parameterPosterior), colour=colorPosterior) +
-    geom_vline(data = Top200, xintercept = modePosterior, colour="purple") +
+    geom_density(data = sampPriors, aes(x = parameterPrior), colour=colorPrior,size=1) +
+    geom_density(data = Top200, aes(x = parameterPosterior), colour=colorPosterior) +
+    geom_vline(xintercept = modePosterior, colour="purple") +
     ggtitle(title) +
     xlab(xAxisTitle) +
     theme_bw() +
