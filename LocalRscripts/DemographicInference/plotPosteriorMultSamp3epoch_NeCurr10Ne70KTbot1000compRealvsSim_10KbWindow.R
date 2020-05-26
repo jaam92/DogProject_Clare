@@ -72,18 +72,20 @@ Top200_Pi = results %>%
   top_n(-200, jointScore)
 
 ####Generate high density regions and compute credible intervals and find mode 
-#If you do not supply the density of the parameter this package will smooth the posterior using default density otherwise it will use kernel density estimation with it's own algorithm where the default kernel bandwidth h is selected using the algorithm of Samworth and Wand (2010)
-cols = c('SimNeOne','SimNeTwo','SimNeThree','SimTimeOne', 'SimTimeTwo')
+#If you do not supply the density of the parameter this package will smooth the posterior using default density, otherwise kernel density estimation will be done with it's own algorithm where the default kernel bandwidth h is selected using the algorithm of Samworth and Wand (2010)
+cols = c('SimNeThree','SimTimeTwo','SimNeTwo','SimTimeOne','SimNeOne')
 credibleIntervals = data.frame()
 
 for (Param in cols) {
   df = hdr(x = Top200[,Param], prob = c(95), den = density(Top200[,Param]))
-  ParamCredInt = cbind.data.frame(Param, trunc(df$mode), trunc(df$hdr))
-  hdr.den(x = Top200[,Param], prob = c(95), den = density(Top200[,Param]))
+  ParamCredInt = cbind.data.frame(Param, ceiling(df$mode), round(df$hdr, 3))
+  #hdr.den(x = Top200[,Param], prob = c(95), den = density(Top200[,Param]))
   credibleIntervals = rbind.data.frame(credibleIntervals, ParamCredInt)
 }
 
-x = grid.table(credibleIntervals)
+credibleIntervals$Param = c("Ancient Ne", "Ancient Bottleneck", "Intermidiate Ne","Recent Bottleneck", "Current Ne") 
+
+gridExtra::grid.table(credibleIntervals, cols = c("Parameter", "Mode", "Lower Bound (95% CI)", "Upper Bound (95% CI)"), rows = NULL)
 
 #Function to estimate the mode as the maximum of the density
 #By suppl
