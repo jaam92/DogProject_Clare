@@ -95,9 +95,12 @@ cowplot::plot_grid(annotP2, legend, rel_widths = c(2,.1))
 ##Figure 3 uses ggarrange
 ##dimensions for pdf are w=18 and h=20
 library(ggpubr)
+library(jpeg)
+library(grid)
 source("~/Documents/DogProject_Clare/LocalRscripts/DemographicInference/plotPosteriorMultSamp3epoch_NeCurr10Ne70KTbot1000compRealvsSim_10KbWindow.R")
-ggarrange(ABCandDemog, plotPosteriorTogether)
-
+img = grid::rasterGrob(readJPEG('~/Documents/DogProject_Clare/LocalRscripts/PlotMSFigures/Demography.jpg')) #grab image of demography 
+#ggarrange(ABCandDemog, plotPosteriorTogether)
+ggarrange(img, ABCSummaryTable, nrow = 2)
 
 #Figure 4
 ##Figure 4 uses ggarrange
