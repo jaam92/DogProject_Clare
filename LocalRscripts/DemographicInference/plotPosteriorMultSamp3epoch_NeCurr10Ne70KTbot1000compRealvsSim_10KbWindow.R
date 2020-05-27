@@ -84,8 +84,8 @@ for (Param in cols) {
 }
 
 credibleIntervals$Param = c("Ancient Ne", "Ancient Bottleneck", "Intermidiate Ne","Recent Bottleneck", "Current Ne") 
-
-gridExtra::grid.table(credibleIntervals, cols = c("Parameter", "Mode", "Lower Bound (95% CI)", "Upper Bound (95% CI)"), rows = NULL)
+colnames(credibleIntervals) = c("Parameter", "Mode", "Lower Bound (95% CI)", "Upper Bound (95% CI)")
+ABCSummaryTable = ggtexttable(credibleIntervals, rows = NULL, theme = ttheme("mCyan"))
 
 
 #Plotting Function for posterior
@@ -203,7 +203,7 @@ CompDataS_zoom = ggplot(data=comboDF %>% filter(bin > 0 & bin < 13), aes(x=bin, 
 subsetReal_pi = PiRealData %>% select("bin","propSites", "Data")
 subsetSim_pi = piBins %>% select("bin","proportion", "Data")
 matchCols = c("bin","propSites","Data")
-colnames(subsetRea_pil) <- matchCols
+colnames(subsetReal_pi) <- matchCols
 colnames(subsetSim_pi) <- matchCols
 comboDF_pi = rbind.data.frame(subsetReal,subsetSim)
 
