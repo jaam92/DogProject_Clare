@@ -5,16 +5,19 @@ library(dplyr)
 library(tidyr)
 
 ####Read files in
-setwd("~/DogProject_Clare/generateExonCoords")
-genes = read.delim("~/DogProject_Clare/generateExonCoords/EnsemblGenes_CanFam3.1.bed", check.names = F) #come from UCSC table browser (downloaded as bed)
-gene_names = read.table("~/DogProject_Clare/generateExonCoords/EnsemblGenes_CanFam3.1_geneNames.txt")
+setwd("~/Documents/DogProject_Clare/LocalRscripts/generateExonCoords")
+genes = read.delim("~/Documents/DogProject_Clare/LocalRscripts/generateExonCoords/EnsemblGenes_CanFam3.1.bed", check.names = F, stringsAsFactors = F) #come from UCSC table browser (downloaded as bed)
+gene_names = read.table("~/Documents/DogProject_Clare/LocalRscripts/generateExonCoords/EnsemblGenes_CanFam3.1_geneNames.txt", stringsAsFactors = F)
 
 ###Add gene name -> calculate transcript length -> keep only longest transcript -> keep autosomal -> parse exons
 GeneSet = genes %>% 
-  mutate(chrom = gsub("chr", "", chrom), AbbrevName = gene_names$V2[match(name, gene_names$V1)], transcript_length = transcriptionEnd - transcriptionStart) %>% 
+  mutate(chrom = gsub("chr", "", chrom), 
+         AbbrevName = gene_names$V2[match(name, gene_names$V1)],
+         transcript_length = transcriptionEnd - transcriptionStart) %>% 
   group_by(AbbrevName) %>% 
-  filter(transcript_length == max(transcript_length) & as.numeric(chrom) <= 38) %>% 
-  distinct(AbbrevName,.keep_all= TRUE) %>% 
+  filter(transcript_length == max(transcript_length) & chrom %in% 1:38) %>% 
+  ungroup() %>%
+  distinct(AbbrevName,.keep_all= TRUE) %>% #removes duplicates of transcripts that are the same length
   separate_rows(exonStarts, exonEnds) %>% 
   mutate(CHROM = sub("^", "chr", chrom)) %>%
   select(CHROM, transcriptionStart, transcriptionEnd, transcript_length, codingRegionStart, codingRegionEnd, exonStarts, exonEnds, name, AbbrevName) %>%
