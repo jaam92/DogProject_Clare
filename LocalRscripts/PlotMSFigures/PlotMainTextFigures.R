@@ -15,15 +15,13 @@ sumstats = ggarrange(plotGW_newLegend,
                      nrow = 2, 
                      common.legend = T, 
                      legend = "right",  
-                     labels = c("B", "C"), 
-                     font.label = list(size = 24))
+                     labels = c("B", "C"))
 ggarrange(IBSTree, 
           sumstats, 
           ncol = 2, 
           nrow = 1, 
           align = 'hv', 
-          labels = c("A"), 
-          font.label = list(size = 24))
+          labels = c("A"))
 
 #Restart R session
 #.rs.restartR()
@@ -93,47 +91,45 @@ cowplot::plot_grid(annotP2, legend, rel_widths = c(2,.1))
 
 ##import all the code we need for Figure 3
 ##Figure 3 uses ggarrange
-##dimensions for pdf are w=18 and h=20
-library(ggpubr)
+##dimensions for pdf are w=10 and h=3
 library(jpeg)
 library(grid)
 source("~/Documents/DogProject_Clare/LocalRscripts/DemographicInference/plotPosteriorMultSamp3epoch_NeCurr10Ne70KTbot1000compRealvsSim_10KbWindow.R")
 img = grid::rasterGrob(readJPEG('~/Documents/DogProject_Clare/LocalRscripts/PlotMSFigures/Demography.jpg')) #grab image of demography 
-#ggarrange(ABCandDemog, plotPosteriorTogether)
-ggarrange(img, ABCSummaryTable, nrow = 2)
+ggarrange(img, ABCSummaryTable, 
+          ncol = 2,  
+          labels = c("A", "B"))
 
 #Figure 4
 ##Figure 4 uses ggarrange
-##dimensions for pdf are w=36 and h=12
+##dimensions for pdf are w=10 and h=5 (for just Fst)
 library(ggpubr)
-source("~/Documents/DogProject_Clare/LocalRscripts/PRDM9/plotNJTree.R")
-source("~/Documents/DogProject_Clare/LocalRscripts/Fst/PlotPairwise_EWvsAW.R")
-source("~/Documents/DogProject_Clare/LocalRscripts/Fst/PlotPairwise_EWvsTM.R")
+#source("~/Documents/DogProject_Clare/LocalRscripts/PRDM9/plotNJTree.R")
+source("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/PlotPairwise_EWvsAW.R")
+source("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/PlotPairwise_EWvsTM.R")
 
-geneTrees = ggarrange(PRDM9Tree, 
-                      GAPDHTree, 
-                      align = 'hv', 
-                      nrow = 2,
-                      labels=c("A","B"), 
-                      font.label = list(size = 24))
+#geneTrees = ggarrange(PRDM9Tree, 
+#                      GAPDHTree, 
+#                      align = 'hv', 
+#                      nrow = 2,
+#                      labels=c("A","B"))
 
 Fst = ggarrange(correlationFstSnpCount_EPAS1 + labs(x="",y=""), 
                 correlationFstSnpCount_CREBBP + labs(x="",y=""), 
                 nrow = 2, 
                 ncol = 1, 
                 align = 'hv', 
-                labels=c("C","D"), 
-                font.label = list(size = 24), 
+                labels=c("A","B"), 
                 common.legend = TRUE, 
                 legend = "right")
 
 Fst_addAxes = annotate_figure(Fst, 
-                  left = text_grob("Count SNPs", 
-                                   size = 20, 
-                                   face = "bold", 
-                                   rot = 90),
-                  bottom = text_grob(expression(F[ST]), 
-                                   size = 20, 
-                                   face = "bold"))
+                              left = text_grob("Number of SNPs", 
+                                               size = 20, 
+                                               face = "bold", 
+                                               rot = 90),
+                              bottom = text_grob(expression(F[ST]), 
+                                                 size = 20, 
+                                                 face = "bold"))
 
-ggarrange(geneTrees, Fst_addAxes, ncol = 2)
+#ggarrange(geneTrees, Fst_addAxes, ncol = 2)
