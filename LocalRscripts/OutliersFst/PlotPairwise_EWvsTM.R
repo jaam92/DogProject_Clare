@@ -71,7 +71,7 @@ EPAS1 = FstPerGene %>% filter(GeneName =="EPAS1") %>%
   as.numeric()#FST for EPAS1
 
 #plot correlation between number of SNPs and Fst
-FstPerGene$Label = ifelse(FstPerGene$FstNormSNPCount >= quantile(FstPerGene$FstNormSNPCount,prob=0.95), "Top5%","Remainder")
+FstPerGene$Label = ifelse(FstPerGene$FstNormSNPCount >= quantile(FstPerGene$FstNormSNPCount,prob=0.95), "Top 5% Outliers","Remainder of Genes")
 
 correlationFstSnpCount_EPAS1 = ggplot(FstPerGene, aes(x=FstNormSNPCount,y=SNPCount,colour=Label)) + 
   geom_point() + 
