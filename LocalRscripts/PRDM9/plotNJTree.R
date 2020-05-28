@@ -2,7 +2,7 @@
 library(ggplot2)
 library(ggtree)
 library(phangorn)
-library(TreeSearch)
+library(TreeTools)
 library(ggpubr)
 
 #####Read the nexus format PRDM9 mafft aligned data in ######
@@ -45,7 +45,7 @@ PRDM9Tree = ggtree(bootstrap.jc.highconf, layout = "slanted") +
   theme_tree2() + 
   geom_tiplab(size=14, color="blue") + 
   ggtitle("PRDM9") + 
-  theme(axis.text.x = element_text(size  = 20), 
+  theme(axis.text.x = element_text(size= 20), 
         axis.text.y = element_blank(), 
         plot.title=element_text(size=24, hjust=0.5), 
         axis.title=element_text(size=24),
@@ -85,5 +85,4 @@ geneTrees = ggarrange(PRDM9Tree,
                       GAPDHTree, 
                       align = 'hv', 
                       nrow = 2,
-                      labels=c("A","B"), 
-                      font.label = list(size = 24))
+                      labels=c("A","B"))

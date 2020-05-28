@@ -6,18 +6,22 @@ library(ggpubr)
 setwd("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst")
 
 #gene set for Ensembl
-genes = read.delim("~/Documents/DogProject_Jaz/CaseControlROH/EnsemblGenes_CanFam3.1.bed", sep = "\t")
-gene_names = read.table("~/Documents/DogProject_Jaz/CaseControlROH/EnsemblGenes_CanFam3.1_geneNames.txt")
+genes = read.delim("~/Documents/DogProject_Jaz/LocalRscripts/CaseControlROH/EnsemblGenes_CanFam3.1.bed", sep = "\t")
+gene_names = read.table("~/Documents/DogProject_Jaz/LocalRscripts/CaseControlROH/EnsemblGenes_CanFam3.1_geneNames.txt")
 
 ####Make file with genes of interest
 ####Filter to only chromosomes 1-38
 ####keep only longest transcript (need to use distinct too bc some transcripts have equal length and we only want to keep one entry)
-GeneSet = genes %>%
-  mutate(AbbrevName = gene_names$V2[match(name, gene_names$V1)], transcript_length = transcriptionEnd - transcriptionStart) %>%
+GeneSet = genes %>% 
+  mutate(chrom = gsub("chr", "", chrom), 
+         AbbrevName = gene_names$V2[match(name, gene_names$V1)],
+         transcript_length = transcriptionEnd - transcriptionStart) %>% 
   group_by(AbbrevName) %>% 
-  filter(transcript_length == max(transcript_length) & as.numeric(chrom) <= 38) %>%
+  filter(transcript_length == max(transcript_length) & chrom %in% 1:38) %>% 
+  ungroup() %>%
   distinct(AbbrevName,.keep_all= TRUE)  %>% 
   select(name, AbbrevName, chrom, transcriptionStart, transcriptionEnd, transcript_length) %>%
+  mutate(chrom = paste0("chr",chrom)) %>%
   as.data.frame()
 GeneSet$bin = seq.int(nrow(GeneSet)) #add bin
 

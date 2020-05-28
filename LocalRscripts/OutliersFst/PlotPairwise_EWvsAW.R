@@ -4,30 +4,31 @@ library(boot)
 library(ggrepel)
 
 #read file in
-pairwiseFst = read_delim("~/Documents/DogProject_Clare/LocalRscripts/Fst/EW_vs_AW_allSites_rmNAN.weir.fst", delim = "\t") %>%
+pairwiseFst = read_delim("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/EW_vs_AW_allSites_rmNAN.weir.fst", delim = "\t") %>%
   mutate(POS_END = POS,
          updatedFst = ifelse(WEIR_AND_COCKERHAM_FST < 0, as.numeric(0), WEIR_AND_COCKERHAM_FST),
          bin = row_number()) 
 
-genes = read.delim("~/Documents/DogProject_Jaz/CaseControlROH/EnsemblGenes_CanFam3.1.bed", sep = "\t")
-gene_names = read.table("~/Documents/DogProject_Jaz/CaseControlROH/EnsemblGenes_CanFam3.1_geneNames.txt")
+genes = read.delim("~/Documents/DogProject_Jaz/LocalRscripts/CaseControlROH/EnsemblGenes_CanFam3.1.bed", sep = "\t", stringsAsFactors = F)
+gene_names = read.table("~/Documents/DogProject_Jaz/LocalRscripts/CaseControlROH/EnsemblGenes_CanFam3.1_geneNames.txt", stringsAsFactors = F)
 
 ####Make file with genes of interest
 ####Filter to only chromosomes 1-38
 ####keep only longest transcript (need to use distinct too bc some transcripts have equal length and we only want to keep one entry)
-
-#gene set for Ensembl
-GeneSet = genes %>%
-  mutate(AbbrevName = gene_names$V2[match(name, gene_names$V1)], transcript_length = transcriptionEnd - transcriptionStart) %>%
+GeneSet = genes %>% 
+  mutate(chrom = gsub("chr", "", chrom), 
+         AbbrevName = gene_names$V2[match(name, gene_names$V1)],
+         transcript_length = transcriptionEnd - transcriptionStart) %>% 
   group_by(AbbrevName) %>% 
-  filter(transcript_length == max(transcript_length) & as.numeric(chrom) <= 38) %>%
+  filter(transcript_length == max(transcript_length) & chrom %in% 1:38) %>% 
+  ungroup() %>%
   distinct(AbbrevName,.keep_all= TRUE)  %>% 
   select(name, AbbrevName, chrom, transcriptionStart, transcriptionEnd, transcript_length) %>%
+  mutate(chrom = paste0("chr",chrom)) %>%
   as.data.frame()
-GeneSet$bin = seq.int(nrow(GeneSet)) #add bin
 
-#delete genes
-rm(genes)
+GeneSet$bin = seq.int(nrow(GeneSet)) #add bin
+rm(genes)#delete genes
 
 #Compute Fst within genes and figure out which window each position falls 
 FstPosRanges = with(pairwiseFst, GRanges(CHROM, IRanges(start=POS, end = POS_END), score=updatedFst))
@@ -89,7 +90,7 @@ sum(FstPerGene$FstNormSNPCount >= CREBBP)/nrow(FstPerGene) #pvalue
 
 ####Compute Pi per gene EW and AW####
 #Read file in 
-AW_PI = read_delim("~/Documents/DogProject_Clare/LocalRscripts/Fst/AW_allSites.sites.pi", delim = "\t") %>%
+AW_PI = read_delim("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/AW_allSites.sites.pi", delim = "\t") %>%
   mutate(bin = row_number()) 
 
 piPosRanges = with(AW_PI, GRanges(CHROM, IRanges(start=POS, end = POS), score=PI))
@@ -112,7 +113,7 @@ AW_piPerGene = AW_PI %>%
   ungroup()
 
 #Read file in 
-EW_PI = read_delim("~/Documents/DogProject_Clare/LocalRscripts/Fst/EW_allSites.sites.pi", delim = "\t") %>%
+EW_PI = read_delim("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/EW_allSites.sites.pi", delim = "\t") %>%
   mutate(bin = row_number()) 
 
 piPosRanges = with(EW_PI, GRanges(CHROM, IRanges(start=POS, end = POS), score=PI))
