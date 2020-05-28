@@ -83,9 +83,9 @@ for (Param in cols) {
   credibleIntervals = rbind.data.frame(credibleIntervals, ParamCredInt)
 }
 
-credibleIntervals$Param = c("Ancient Ne", "Ancient Bottleneck", "Intermidiate Ne","Recent Bottleneck", "Current Ne") 
-colnames(credibleIntervals) = c("Parameter", "Mode", "Lower Bound (95% CI)", "Upper Bound (95% CI)")
-ABCSummaryTable = ggtexttable(credibleIntervals, rows = NULL, theme = ttheme("mCyan"))
+credibleIntervals$Param = c("Ancient population size", "Ancient bottleneck (generations ago)", "Intermidiate population size","Recent bottleneck (generations ago)", "Current population size") 
+colnames(credibleIntervals) = c("Parameter", "Point Estimate", "Lower Bound (95% CI)", "Upper Bound (95% CI)")
+ABCSummaryTable = ggtexttable(credibleIntervals, rows = NULL)
 
 
 #Plotting Function for posterior
