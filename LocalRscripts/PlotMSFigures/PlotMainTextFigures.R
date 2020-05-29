@@ -62,14 +62,14 @@ EW = pairSlidingWindowandROH(hets_EW3, ROHRangePlot_EW)
 IR = ggarrange(hets_IR3 + 
                  ylim(0,0.005) + 
                  ylab("") + 
-                 theme(axis.title.x=element_text(size=20, face = "bold"),
-                       axis.text = element_text(size = 16),
+                 theme(axis.title.x=element_text(size = 24, face = "bold"),
+                       axis.text = element_text(size = 20),
                        legend.position = "none"),
                ROHRangePlot_IR + 
                  xlab("") +
-                 theme(axis.title.y=element_text(size=20, face = "bold"), 
-                       axis.text.x = element_text(size = 18),
-                       axis.text.y = element_text(size = 16),
+                 theme(axis.title.y=element_text(size = 24, face = "bold"), 
+                       axis.text.x = element_text(size = 20),
+                       axis.text.y = element_text(size = 20),
                        panel.border = element_blank(), 
                        panel.grid.major.x = element_blank(),
                        panel.grid.minor.x = element_blank(),
@@ -81,7 +81,7 @@ IR = ggarrange(hets_IR3 +
 p2 = ggarrange(BC, LB, PG, TM, AW, EW, IR, nrow = 7)
 annotP2 = annotate_figure(p2,
                           left = text_grob("Heterozygosity(per bp)", 
-                                           size=20, 
+                                           size = 24, 
                                            face = "bold",
                                            rot = 90))
 cowplot::plot_grid(annotP2, legend, rel_widths = c(2,.1))
@@ -91,11 +91,12 @@ cowplot::plot_grid(annotP2, legend, rel_widths = c(2,.1))
 
 ##import all the code we need for Figure 3
 ##Figure 3 uses ggarrange
-##dimensions for pdf are w=10 and h=3
+##dimensions for pdf are w=15 and h=5
 library(jpeg)
 library(grid)
-source("~/Documents/DogProject_Clare/LocalRscripts/DemographicInference/plotPosteriorMultSamp3epoch_NeCurr10Ne70KTbot1000compRealvsSim_10KbWindow.R")
-img = grid::rasterGrob(readJPEG('~/Documents/DogProject_Clare/LocalRscripts/PlotMSFigures/Demography.jpg')) #grab image of demography 
+source("~/Documents/DogProject_Clare/LocalRscripts/DemographicInference/plotPosteriorMultSamp3epoch_NeCurr10Ne70KTbot1000compRealvsSim.R")
+img = rasterGrob(readJPEG('~/Documents/DogProject_Clare/LocalRscripts/PlotMSFigures/Demography.jpg')) #grab image of demography 
+ABCSummaryTable = ggtexttable(credibleIntervals, rows = NULL, theme = ttheme("mCyan")) #if you want cyan table
 ggarrange(img, ABCSummaryTable, 
           ncol = 2,  
           labels = c("A", "B"))
