@@ -1,8 +1,7 @@
 #Load libraries
 library(data.table)
-library(ggplot2)
+library(tidyverse)
 library(hablar)
-library(dplyr)
 library(mgsub)
 
 #Load files
@@ -43,7 +42,8 @@ preFilter = ggplot() +
 #allCanidsTrueROH = subset(z, z$ToKeep == "TRUE")
 
 #Filter chosen for project (ROH is at least 10kb)
-allCanidsTrueROH = subset(nonQCROH_allCanids, nonQCROH_allCanids$Prop_Covered >= 0.4 & nonQCROH_allCanids$ROH_length != 1 & nonQCROH_allCanids$ROH_length != 0 & nonQCROH_allCanids$ROH_length >= 10000) %>% 
+allCanidsTrueROH = nonQCROH_allCanids %>%
+  filter(Prop_Covered >= 0.4 & ROH_length != 1 & ROH_length != 0 & ROH_length >= 10000) %>% 
   select(-c(FileName)) %>%
   mutate(CHROM = paste("chr",CHROM,sep = ""))
 
