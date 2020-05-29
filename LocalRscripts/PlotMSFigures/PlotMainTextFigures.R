@@ -149,7 +149,7 @@ img = rasterGrob(readJPEG('~/Documents/DogProject_Clare/LocalRscripts/OutliersFs
 correlationFstSnpCount_CREBBP + 
   labs(x=expression(F[ST]), y="Number of SNPs") + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + 
-  annotation_custom(img, xmin=0.5,xmax=1.2, ymin=2000, ymax=4500)
+  annotation_custom(img, xmin=0.5,xmax=1.2, ymin=2000, ymax=6000)
 
 #Restart R session
 .rs.restartR()
