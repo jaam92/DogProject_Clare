@@ -316,8 +316,7 @@ VisualizeABC = ggplot() +
 d=data.frame(x1=c(5.25,5,4.5), 
              x2=c(5.8,6,6.5), 
              y1=c(1,3,8), 
-             y2=c(3,8,13),
-             r=c("Ne1","Ne2","Ne3"))
+             y2=c(3,8,13))
 
 DemographicModel = ggplot() + 
   scale_x_continuous(name="x") + 
@@ -330,11 +329,6 @@ DemographicModel = ggplot() +
                         fill=t), 
             fill="blue", 
             alpha=0.8) +
-  geom_text(data=d, 
-            aes(x=x1+(x2-x1)/2,
-                y=y1+(y2-y1)/2, 
-                label=r), 
-            size=4) +
   theme_bw() +
   theme(line = element_blank(),
         text = element_blank(),

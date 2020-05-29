@@ -1,6 +1,7 @@
 #Set Libraries and working directory
-library(data.table)
 library(tidyverse)
+library(data.table)
+library(hdrcde)
 library(ggpubr)
 
 #Plot the priors
@@ -16,7 +17,7 @@ sampPriors = cbind.data.frame(samps,Ne1,Ne2,Ne3,Tbot,Tbot2)
 #Plotting Function for priors
 plotPrior <- function(xAxisTitle, title, parameter, color){
   ggplot() + 
-    geom_density(aes(x=parameter), colour=color) + 
+    geom_density(aes(x=parameter), colour=color, outline.type = "full") + 
     ggtitle(title) + 
     xlab(xAxisTitle) + 
     theme_bw() + 
@@ -25,7 +26,6 @@ plotPrior <- function(xAxisTitle, title, parameter, color){
           axis.title=element_text(size=20), 
           plot.title = element_text(size=20, hjust = 0.5))
 }
-
 
 plotNe1 = plotPrior("unif(10,1000)", expression(paste(Ne[Current])), Ne1, "gray30")
 
@@ -70,24 +70,28 @@ Top200_Pi = results %>%
   filter(SummaryStat == "piPerBin") %>%
   top_n(-200, jointScore)
 
-#Function to estimate the mode as the maximum of the density
-estimate_mode <- function(s) {
-  d <- density(s)
-  trunc(d$x[which.max(d$y)])
+####Generate high density regions and compute credible intervals and find mode 
+#If you do not supply the density of the parameter this package will smooth the posterior using default density, otherwise kernel density estimation will be done with it's own algorithm where the default kernel bandwidth h is selected using the algorithm of Samworth and Wand (2010)
+cols = c('SimNeThree','SimTimeTwo','SimNeTwo','SimTimeOne','SimNeOne')
+credibleIntervals = data.frame()
+
+for (Param in cols) {
+  df = hdr(x = Top200[,Param], prob = c(95), den = density(Top200[,Param]))
+  ParamCredInt = cbind.data.frame(Param, ceiling(df$mode), round(df$hdr, 3))
+  #hdr.den(x = Top200[,Param], prob = c(95), den = density(Top200[,Param]))
+  credibleIntervals = rbind.data.frame(credibleIntervals, ParamCredInt)
 }
 
-modePosteriorNe1 = estimate_mode(Top200$SimNeOne)
-modePosteriorNe2 = estimate_mode(Top200$SimNeTwo)
-modePosteriorNe3 = estimate_mode(Top200$SimNeThree)
-modePosteriorTbot1 = estimate_mode(Top200$SimTimeOne)
-modePosteriorTbot2 = estimate_mode(Top200$SimTimeTwo)
+credibleIntervals$Param = c("Ancient population size", "Ancient bottleneck (generations ago)", "Intermidiate population size","Recent bottleneck (generations ago)", "Current population size") 
+colnames(credibleIntervals) = c("Parameter", "Point Estimate", "Lower Bound (95% CI)", "Upper Bound (95% CI)")
+ABCSummaryTable = ggtexttable(credibleIntervals, rows = NULL)
 
 #Plotting Function for posterior
 plotPosterior <- function(title, xAxisTitle, parameterPrior, colorPrior, parameterPosterior, colorPosterior, modePosterior ){
   ggplot() + 
-    geom_density(data=sampPriors, aes(x=parameterPrior), colour=colorPrior,size=1) +
-    geom_density(data=Top200, aes(x=parameterPosterior), colour=colorPosterior) +
-    geom_vline(data = Top200, xintercept = modePosterior, colour="purple") +
+    geom_density(data = sampPriors, aes(x = parameterPrior), colour=colorPrior,size=1) +
+    geom_density(data = Top200, aes(x = parameterPosterior), colour=colorPosterior) +
+    geom_vline(xintercept = modePosterior, colour="purple") +
     ggtitle(title) +
     xlab(xAxisTitle) +
     theme_bw() +
@@ -172,8 +176,8 @@ CompDataS = ggplot(data=comboDF %>% filter(bin <= 13), aes(x=bin, y=propSites,fi
   labs(x="Count Segregating Sites", y="Proportion of Total Segregating sites") +
   theme(axis.text.x = element_text(size  = 20), 
         axis.text.y = element_text(size = 20), 
-        axis.title=element_text(size=24, face = "bold"), 
-        plot.title = element_text(size=24, hjust = 0.5),
+        axis.title = element_text(size = 24), 
+        plot.title = element_text(size = 24, hjust = 0.5),
         legend.title=element_blank(), 
         legend.text=element_text(size=20)) +
   scale_fill_manual(values = c("Empirical"="blue","Simulated"="red")) +
@@ -185,8 +189,8 @@ CompDataS_zoom = ggplot(data=comboDF %>% filter(bin > 0 & bin < 13), aes(x=bin, 
   labs(x="Count Segregating Sites", y="Proportion of Total Segregating sites") +
   theme(axis.text.x = element_text(size  = 20), 
         axis.text.y = element_text(size = 20), 
-        axis.title=element_text(size=24, face = "bold"), 
-        plot.title = element_text(size=24, hjust = 0.5),
+        axis.title = element_text(size = 24), 
+        plot.title = element_text(size = 24, hjust = 0.5),
         legend.title=element_blank(),
         legend.text=element_text(size=20)) + 
   scale_fill_manual(values = c("Empirical"="blue","Simulated"="red")) +
@@ -197,7 +201,7 @@ CompDataS_zoom = ggplot(data=comboDF %>% filter(bin > 0 & bin < 13), aes(x=bin, 
 subsetReal_pi = PiRealData %>% select("bin","propSites", "Data")
 subsetSim_pi = piBins %>% select("bin","proportion", "Data")
 matchCols = c("bin","propSites","Data")
-colnames(subsetRea_pil) <- matchCols
+colnames(subsetReal_pi) <- matchCols
 colnames(subsetSim_pi) <- matchCols
 comboDF_pi = rbind.data.frame(subsetReal,subsetSim)
 
@@ -218,10 +222,10 @@ CompDataPi = ggplot(data=comboDF_pi %>% filter(bin <= 12), aes(x=intervals, y=pr
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() + 
   labs(x="Interval", y=expression(Proportion ~ Simulations ~ pi)) +
-  theme(axis.text.x = element_text(size  = 20, angle = 90, hjust = 0.5), 
+  theme(axis.text.x = element_text(size = 20, angle = 90, hjust = 0.5), 
         axis.text.y = element_text(size = 20), 
-        axis.title = element_text(size=24, face = "bold"), 
-        plot.title = element_text(size=24, hjust = 0.5),
+        axis.title = element_text(size = 24), 
+        plot.title = element_text(size = 24, hjust = 0.5),
         legend.title = element_blank(), 
         legend.text=element_text(size=20)) + 
   scale_fill_manual(values = c("Empirical"="blue","Simulated"="red"))
@@ -232,7 +236,7 @@ CompDataPi_zoom = ggplot(data=comboDF_pi %>% filter(bin > 0 & bin <= 12), aes(x=
   labs(x="Interval", y=expression(Proportion ~ Simulations ~ pi)) +
   theme(axis.text.x = element_text(size  = 20, angle = 90, hjust = 0.5), 
         axis.text.y = element_text(size = 20), 
-        axis.title = element_text(size=24, face = "bold"), 
+        axis.title = element_text(size=24), 
         plot.title = element_text(size=24, hjust = 0.5),
         legend.title=element_blank(), 
         legend.text=element_text(size=20)) + 
@@ -310,8 +314,7 @@ VisualizeABC = ggplot() +
 d=data.frame(x1=c(5.25,5,4.5), 
              x2=c(5.8,6,6.5), 
              y1=c(1,3,8), 
-             y2=c(3,8,13),
-             r=c("Ne1","Ne2","Ne3"))
+             y2=c(3,8,13))
 
 DemographicModel = ggplot() + 
   scale_x_continuous(name="x") + 
@@ -324,11 +327,6 @@ DemographicModel = ggplot() +
                         fill=t), 
             fill="blue", 
             alpha=0.8) +
-  geom_text(data=d, 
-            aes(x=x1+(x2-x1)/2,
-                y=y1+(y2-y1)/2, 
-                label=r), 
-            size=4) +
   theme_bw() +
   theme(line = element_blank(),
         text = element_blank(),
@@ -350,19 +348,3 @@ ABCandDemog = ggarrange(DemographicModel, VisualizeABC + theme(legend.position =
 #  list(hpdr=range(dx$x[px>=ct]),mode=md)
 #}
 #hpd(Top200$SimNeOne, 0.95)
-
-#Option 1 to generate high density regions
-#If you do not supply the density of the parameter this package will smooth the posterior 
-library(hdrcde)
-library(gridExtra)
-cols = c('SimNeOne','SimNeTwo','SimNeThree','SimTimeOne', 'SimTimeTwo')
-credibleIntervals = data.frame()
-
-for (Param in cols) {
-  df = hdr(x = Top200[,Param], prob = c(95), den = density(Top200[,Param]))
-  ParamCredInt = cbind.data.frame(Param, trunc(df$mode), trunc(df$hdr))
-  hdr.den(x = Top200[,Param], prob = c(95), den = density(Top200[,Param]))
-  credibleIntervals = rbind.data.frame(credibleIntervals, ParamCredInt)
-}
-
-x = grid.table(credibleIntervals)
