@@ -24,7 +24,7 @@ ggarrange(IBSTree,
           labels = c("A"))
 
 #Restart R session
-#.rs.restartR()
+.rs.restartR()
 
 
 ##import all the code we need for Figure 2
@@ -38,13 +38,15 @@ pairSlidingWindowandROH = function(slidingWinPlot, ROHPlot){
               ylim(0,0.005) + 
               ylab("") + 
               theme(axis.title.x=element_blank(),
-                    axis.text = element_text(size = 16)),
+                    axis.text.x = element_text(hjust = 0.9, vjust = 0.5,
+                                               angle = 90, size = 24),
+                    axis.text = element_text(size = 24)),
             ROHPlot + 
               ylab("") +
-              theme(axis.title.y=element_blank(), 
+              theme(axis.title.y=element_blank(),
                     legend.position = "none",  
-                    axis.text.x = element_text(size = 18),
-                    axis.text.y = element_text(size = 16),
+                    axis.text.x = element_text(size = 24),
+                    axis.text.y = element_blank(),
                     panel.border = element_blank(), 
                     panel.grid.major.x = element_blank(),
                     panel.grid.minor.x = element_blank()),
@@ -52,7 +54,7 @@ pairSlidingWindowandROH = function(slidingWinPlot, ROHPlot){
             nrow = 1,
             align = 'hv')
 }
-
+legend = cowplot::get_legend(ROHRangePlot_BC + theme(legend.title=element_text(size=24), legend.text=element_text(size=20)))
 BC = pairSlidingWindowandROH(hets_BC3, ROHRangePlot_BC)
 LB = pairSlidingWindowandROH(hets_LB3, ROHRangePlot_LB)
 PG = pairSlidingWindowandROH(hets_PG3, ROHRangePlot_PG)
@@ -62,14 +64,16 @@ EW = pairSlidingWindowandROH(hets_EW3, ROHRangePlot_EW)
 IR = ggarrange(hets_IR3 + 
                  ylim(0,0.005) + 
                  ylab("") + 
-                 theme(axis.title.x=element_text(size = 24, face = "bold"),
-                       axis.text = element_text(size = 20),
+                 theme(axis.title.x=element_text(size = 26, face = "bold"),
+                       axis.text.x = element_text(hjust = 0.9, vjust = 0.5,
+                                                  angle = 90, size = 24),
+                       axis.text = element_text(size = 24),
                        legend.position = "none"),
                ROHRangePlot_IR + 
                  xlab("") +
-                 theme(axis.title.y=element_text(size = 24, face = "bold"), 
-                       axis.text.x = element_text(size = 20),
-                       axis.text.y = element_text(size = 20),
+                 theme(axis.title.y=element_text(size = 26, face = "bold"), 
+                       axis.text.x = element_text(size = 24),
+                       axis.text.y = element_blank(),
                        panel.border = element_blank(), 
                        panel.grid.major.x = element_blank(),
                        panel.grid.minor.x = element_blank(),
@@ -81,13 +85,13 @@ IR = ggarrange(hets_IR3 +
 p2 = ggarrange(BC, LB, PG, TM, AW, EW, IR, nrow = 7)
 annotP2 = annotate_figure(p2,
                           left = text_grob("Heterozygosity(per bp)", 
-                                           size = 24, 
+                                           size = 26, 
                                            face = "bold",
                                            rot = 90))
 cowplot::plot_grid(annotP2, legend, rel_widths = c(2,.1))
 
 #Restart R session
-#.rs.restartR()
+.rs.restartR()
 
 ##import all the code we need for Figure 3
 ##Figure 3 uses ggarrange
@@ -100,6 +104,9 @@ ABCSummaryTable = ggtexttable(credibleIntervals, rows = NULL, theme = ttheme("mC
 ggarrange(img, ABCSummaryTable, 
           ncol = 2,  
           labels = c("A", "B"))
+
+#Restart R session
+.rs.restartR()
 
 #Figure 4
 ##Figure 4 uses ggarrange
@@ -134,3 +141,6 @@ Fst_addAxes = annotate_figure(Fst,
                                                  face = "bold"))
 
 #ggarrange(geneTrees, Fst_addAxes, ncol = 2)
+
+#Restart R session
+.rs.restartR()
