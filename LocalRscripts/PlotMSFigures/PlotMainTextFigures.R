@@ -112,9 +112,11 @@ ggarrange(img, ABCSummaryTable,
 ##Figure 4 uses ggarrange
 ##dimensions for pdf are w=10 and h=5 (for just Fst)
 library(ggpubr)
+library(grid)
+library(jpeg)
 #source("~/Documents/DogProject_Clare/LocalRscripts/PRDM9/plotNJTree.R")
 source("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/PlotPairwise_EWvsAW.R")
-source("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/PlotPairwise_EWvsTM.R")
+#source("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/PlotPairwise_EWvsTM.R")
 
 #geneTrees = ggarrange(PRDM9Tree, 
 #                      GAPDHTree, 
@@ -122,25 +124,32 @@ source("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/PlotPairwise_EWvs
 #                      nrow = 2,
 #                      labels=c("A","B"))
 
-Fst = ggarrange(correlationFstSnpCount_EPAS1 + labs(x="",y=""), 
-                correlationFstSnpCount_CREBBP + labs(x="",y=""), 
-                nrow = 2, 
-                ncol = 1, 
-                align = 'hv', 
-                labels=c("A","B"), 
-                common.legend = TRUE, 
-                legend = "right")
+#Fst = ggarrange(correlationFstSnpCount_EPAS1 + labs(x="",y=""), 
+#                correlationFstSnpCount_CREBBP + labs(x="",y=""), 
+#                nrow = 2, 
+#                ncol = 1, 
+#                align = 'hv', 
+#                labels=c("A","B"), 
+#                common.legend = TRUE, 
+#                legend = "right")
 
-Fst_addAxes = annotate_figure(Fst, 
-                              left = text_grob("Number of SNPs", 
-                                               size = 20, 
-                                               face = "bold", 
-                                               rot = 90),
-                              bottom = text_grob(expression(F[ST]), 
-                                                 size = 20, 
-                                                 face = "bold"))
+#Fst_addAxes = annotate_figure(Fst, 
+#                              left = text_grob("Number of SNPs", 
+#                                               size = 20, 
+#                                               face = "bold", 
+#                                               rot = 90),
+#                              bottom = text_grob(expression(F[ST]), 
+#                                                 size = 20, 
+#                                                 face = "bold"))
 
 #ggarrange(geneTrees, Fst_addAxes, ncol = 2)
+
+#grab image of CREBBP interaction network
+img = rasterGrob(readJPEG('~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/CREBBPstring_vector_graphic.jpg'))
+correlationFstSnpCount_CREBBP + 
+  labs(x=expression(F[ST]), y="Number of SNPs") + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + 
+  annotation_custom(img, xmin=0.5,xmax=1.2, ymin=2000, ymax=4500)
 
 #Restart R session
 .rs.restartR()
