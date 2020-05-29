@@ -43,16 +43,16 @@ bootstrap.jc.highconf= midpoint(fit.jc$tree)
 
 bootstrap.jc.highconf$tip.label = c("Human", "Ethiopian Wolf", "Arctic Wolf", "Tibetan Mastiff", "Dhole", "Mouse", "Rhesus Macaque", "Cat") #new labels
 
-PRDM9Tree = ggtree(bootstrap.jc.highconf, layout = "slanted") + 
+PRDM9Tree = ggtree(bootstrap.jc.highconf, layout = "rectangular") +
   theme_tree2() + 
-  geom_tiplab(size=12) + 
+  geom_tiplab(size=8) + 
   ggtitle("PRDM9") + 
-  theme(axis.text.x = element_text(size= 20), 
+  theme(axis.text.x = element_text(size= 16), 
         axis.text.y = element_blank(), 
-        plot.title=element_text(size=24, hjust=0.5), 
-        axis.title=element_text(size=24),
-        legend.title=element_text(size=20), 
-        legend.text=element_text(size=20))
+        plot.title=element_text(size=16, hjust=0.5), 
+        axis.title=element_text(size=16),
+        legend.title=element_text(size=16), 
+        legend.text=element_text(size=16))
 
 #######Read the GAPDH nexus format mafft aligned data in ########
 newickDat = ReadAsPhyDat("~/Documents/DogProject_Clare/LocalRscripts/PRDM9/NexusFormat_GAPDH_rename.txt")
@@ -73,16 +73,16 @@ bootstrap.jc = bootstrap.pml(fit.jc, bs=100, optNni=TRUE, optEdge = TRUE, multic
 bootstrap.jc.highconf = midpoint(fit.jc$tree)
 bootstrap.jc.highconf$tip.label = c("Human", "Rhesus Macaque", "Ethiopian Wolf", "Arctic Wolf", "Tibetan Mastiff", "Cat", "Mouse")
 
-GAPDHTree = ggtree(bootstrap.jc.highconf, layout = "slanted") + 
+GAPDHTree = ggtree(bootstrap.jc.highconf, layout = "rectangular") +
   theme_tree2() + 
-  geom_tiplab(size=12) + 
-  ggtitle("GAPDH") + 
-  theme(axis.text.x = element_text(size  = 20), 
+  geom_tiplab(size=8) + 
+  ggtitle("PRDM9") + 
+  theme(axis.text.x = element_text(size= 16), 
         axis.text.y = element_blank(), 
-        plot.title=element_text(size=24, hjust=0.5), 
-        axis.title=element_text(size=24),
-        legend.title=element_text(size=20), 
-        legend.text=element_text(size=20))
+        plot.title=element_text(size=16, hjust=0.5), 
+        axis.title=element_text(size=16),
+        legend.title=element_text(size=16), 
+        legend.text=element_text(size=16))
 
 geneTrees = ggarrange(PRDM9Tree, 
                       GAPDHTree, 
