@@ -41,9 +41,11 @@ bootstrap.jc = bootstrap.pml(fit.jc, bs=100, optNni=TRUE, optEdge = TRUE, multic
 #Plot high confidence bootstraps with ggtree
 bootstrap.jc.highconf= midpoint(fit.jc$tree)
 
+bootstrap.jc.highconf$tip.label = c("Human", "Ethiopian Wolf", "Arctic Wolf", "Tibetan Mastiff", "Dhole", "Mouse", "Rhesus Macaque", "Cat") #new labels
+
 PRDM9Tree = ggtree(bootstrap.jc.highconf, layout = "slanted") + 
   theme_tree2() + 
-  geom_tiplab(size=14, color="blue") + 
+  geom_tiplab(size=12) + 
   ggtitle("PRDM9") + 
   theme(axis.text.x = element_text(size= 20), 
         axis.text.y = element_blank(), 
@@ -68,11 +70,12 @@ fit.jc = optim.pml(fit, optNni = TRUE, optEdge = TRUE, model = "JC", rearrangeme
 bootstrap.jc = bootstrap.pml(fit.jc, bs=100, optNni=TRUE, optEdge = TRUE, multicore=TRUE, control = pml.control(trace=0))
 
 #Plot high confidence bootstraps with ggtree
-bootstrap.jc.highconf= midpoint(fit.jc$tree)
+bootstrap.jc.highconf = midpoint(fit.jc$tree)
+bootstrap.jc.highconf$tip.label = c("Human", "Rhesus Macaque", "Ethiopian Wolf", "Arctic Wolf", "Tibetan Mastiff", "Cat", "Mouse")
 
 GAPDHTree = ggtree(bootstrap.jc.highconf, layout = "slanted") + 
   theme_tree2() + 
-  geom_tiplab(size=14, color="blue") + 
+  geom_tiplab(size=12) + 
   ggtitle("GAPDH") + 
   theme(axis.text.x = element_text(size  = 20), 
         axis.text.y = element_blank(), 
