@@ -1,7 +1,6 @@
 #Load Libraries
-library(tidyverse)
 library(data.table)
-library(IRanges)
+library(tidyverse)
 library(GenomicRanges)
 library(ggpubr)
 
@@ -28,7 +27,7 @@ ProcessDF = function(inputDF){ inputDF %>%
     summarise(chr_len=max(window_start)) %>% 
     
     # Calculate cumulative position of each chromosome
-    mutate(tot=cumsum(chr_len)-chr_len) %>%
+    mutate(tot=cumsum(as.numeric(chr_len))-as.numeric(chr_len)) %>%
     dplyr::select(-chr_len) %>%
     
     # Add this info to the initial dataset
@@ -40,7 +39,7 @@ ProcessDF = function(inputDF){ inputDF %>%
 
 #This function implements the previous two functions to create our final data frame for plotting
 
-makeFinalFiles <- function(filesToJoin){
+makeFinalFiles = function(filesToJoin){
   Fnames = lapply(Sys.glob(filesToJoin), read.delim) #grab all chroms
   df = rbindlist(Fnames) #merge all chroms
   dfAnnot = annotateDF(df) %>% 
@@ -63,10 +62,14 @@ plotFunction = function(dataFrame, indiv, color1, color2) {
   #Generate x axis with any one of the data frames 
   axisdf = dataFrame %>% 
     group_by(chromo) %>% 
-    summarize(center=( max(newWinStart) + min(newWinStart) ) / 2 )
+    summarize(center=(max(newWinStart) + min(newWinStart) ) / 2 )
   #Now plot with the axis
   indivHet = ggplot() + 
-    geom_bar(data = dataFrame, aes(x=newWinStart, y=indiv/sites_total, color=as.factor(chromo)),stat = "identity", lwd=0.5) +
+    geom_bar(data = dataFrame, 
+             aes(x=newWinStart, y=indiv/sites_total, 
+                 color=as.factor(chromo)),
+             stat = "identity", 
+             lwd=0.5) +
     scale_color_manual(values = rep(c(color1, color2), 38 )) +
     #custom X axis:
     scale_x_continuous(label = axisdf$chromo, breaks= axisdf$center ) +
