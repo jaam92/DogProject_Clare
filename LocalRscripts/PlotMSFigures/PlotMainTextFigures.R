@@ -145,7 +145,7 @@ source("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/PlotPairwise_EWvs
 #ggarrange(geneTrees, Fst_addAxes, ncol = 2)
 
 #grab image of CREBBP interaction network
-img = rasterGrob(readJPEG('~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/CREBBPstring_vector_graphic.jpg'))
+img = rasterGrob(readJPEG('~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/CREBBPstring_vector_graphic_supportType.jpg'))
 correlationFstSnpCount_CREBBP + 
   labs(x=expression(F[ST]), y="Number of SNPs") + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + 
