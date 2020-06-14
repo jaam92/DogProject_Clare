@@ -42,7 +42,7 @@ PlotDF$Population = factor(PlotDF$Population, levels = orderPops)
 
 ####Make Everything proportional 
 PropPlotDF = PlotDF[,c(1:11, 20:25)] %>%
-  mutate_at(vars(LOF_CountAlleles: PutNeu_CountVariants), list(~./PlotDF$CallableSites)) 
+  mutate_at(vars(LOF_CountAlleles: PutNeu_CountVariants), list(~./PlotDF$CallableSites)) #Just run replace on plotting fxns with regular df to make everything proportional
 
 ####Make Scaled Count Alleles
 scaleCalls = mean(PlotDF$CallableSites)
