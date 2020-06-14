@@ -31,7 +31,7 @@ plotFxn = function(colOfInterest, axisTitle) {
 #Read file in 
 df = read.delim("~/Documents/DogProject_Clare/LocalRscripts/annotateVCF/AllChroms/GTAnnotationCountResults_May2019_DogProjClare.txt", stringsAsFactors = F)
 
-#Plot Counts SYN Derived Alleles
+####Make Plotting Data Frame
 PlotDF = df %>% 
   mutate(CallableSites = LineCount - Missing)
 
@@ -39,6 +39,19 @@ PlotDF$Population = mgsub(PlotDF$Population,
                           pattern =c("BC", "LB", "PG", "TM", "AW", "EW", "IR"), replacement =c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "Arctic Wolf",  "Ethiopian Wolf", "Isle Royale"))
 orderPops = c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "Arctic Wolf",  "Ethiopian Wolf", "Isle Royale")
 PlotDF$Population = factor(PlotDF$Population, levels = orderPops)
+
+####Make Everything proportional 
+PropPlotDF = PlotDF[,c(1:11, 20:25)] %>%
+  mutate_at(vars(LOF_CountAlleles: PutNeu_CountVariants), list(~./PlotDF$CallableSites)) 
+
+####Make Scaled Count Alleles
+scaleCalls = mean(PlotDF$CallableSites)
+ScaledPlotDF = PropPlotDF %>%
+  mutate_at(vars(LOF_CountAlleles: PutNeu_CountVariants), list(~.*scaleCalls))
+
+pSY = plotFxn(ScaledPlotDF$SY_CountAlleles, "Synonymous Derived Alleles") 
+pNS = plotFxn(ScaledPlotDF$NS_CountAlleles, "Nonsynonymous Derived Alleles") 
+pLOF = plotFxn(ScaledPlotDF$LOF_CountAlleles, "Loss of function Derived Alleles") 
 
 ###Plot Supplementary Figures putativeley neutral and deleterious
 CountDerHom_PutDel = plotFxn(PlotDF$PutDel_CountDerHom, "Count Derived Homozygotes") 
@@ -73,21 +86,7 @@ putDelAnnot = annotate_figure(putDel, left = text_grob("Deleterious", size=24, f
 #plot deleterious and neutral
 ggarrange(putNeuAnnot, putDelAnnot, nrow = 2)
 
-
-####Make everything proportional 
-PropPlotDF = PlotDF[,c(1:11, 20:25)] %>%
-  mutate_at(vars(LOF_CountAlleles: PutNeu_CountVariants), list(~./PlotDF$CallableSites)) 
-
-####Plot Scaled Count Alleles
-scaleCalls = mean(PlotDF$CallableSites)
-ScaledPlotDF = PropPlotDF %>%
-  mutate_at(vars(LOF_CountAlleles: PutNeu_CountVariants), list(~.*scaleCalls))
-
-pSY = plotFxn(ScaledPlotDF$SY_CountAlleles, "Count Synonymous Alleles") 
-pNS = plotFxn(ScaledPlotDF$NS_CountAlleles, "Count Nonsynonymous Alleles") 
-pLOF = plotFxn(ScaledPlotDF$LOF_CountAlleles, "Count Loss of function Alleles") 
-
-# arrange the three scaled plots in a single row
+#arrange the three scaled derived allele count plots in a single row
 ggarrange( pSY,
            pNS + theme(axis.title.y=element_blank()),
            pLOF + theme(axis.title.y=element_blank()),
