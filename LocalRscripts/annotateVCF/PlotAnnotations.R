@@ -8,8 +8,8 @@ library(mgsub)
 #Plotting fxn and color palette
 cbPalette = c("Arctic Wolf" = "gray25", "Ethiopian Wolf" = "#D55E00",  "Isle Royale" = "steelblue", "Border Collie" = "#009E73", "Labrador Retriever" = "gold3", "Pug" = "mediumpurple4", "Tibetan Mastiff" = "#CC79A7")
 
-plotFxn = function(colOfInterest, axisTitle) {
-  RaincloudWithBoxPlot = ggplot(PlotDF, aes(x=Population, y=colOfInterest, colour=Population)) +
+plotFxn = function(dataFrame, colOfInterest, axisTitle) {
+  RaincloudWithBoxPlot = ggplot(dataFrame, aes(x=Population, y=colOfInterest, colour=Population)) +
     geom_flat_violin(size=1, position = position_nudge(x = .25, y = 0),adjust =2, trim = FALSE) +
     geom_point(aes(x = as.numeric(Population)-.15, y = colOfInterest, colour = Population),position = position_jitter(width = .05), size = 1, shape = 20) +
     geom_boxplot(aes(as.numeric(Population), y = colOfInterest, fill = Population), outlier.shape = NA, alpha = .5, width = .1, colour = "black") +
@@ -49,19 +49,15 @@ scaleCalls = mean(PlotDF$CallableSites)
 ScaledPlotDF = PropPlotDF %>%
   mutate_at(vars(LOF_CountAlleles: PutNeu_CountVariants), list(~.*scaleCalls))
 
-pSY = plotFxn(ScaledPlotDF$SY_CountAlleles, "Synonymous Derived Alleles") 
-pNS = plotFxn(ScaledPlotDF$NS_CountAlleles, "Nonsynonymous Derived Alleles") 
-pLOF = plotFxn(ScaledPlotDF$LOF_CountAlleles, "Loss of function Derived Alleles") 
-
 ###Plot Supplementary Figures putativeley neutral and deleterious
-CountDerHom_PutDel = plotFxn(PlotDF$PutDel_CountDerHom, "Count Derived Homozygotes") 
-CountDerHom_PutNeu = plotFxn(PlotDF$PutNeu_CountDerHom, "Count Derived Homozygotes")
+CountDerHom_PutDel = plotFxn(PlotDF, PlotDF$PutDel_CountDerHom, "Count Derived Homozygotes") 
+CountDerHom_PutNeu = plotFxn(PlotDF, PlotDF$PutNeu_CountDerHom, "Count Derived Homozygotes")
 
-CountVar_PutDel = plotFxn(PlotDF$PutDel_CountVariants, "Count Variants") 
-CountVar_PutNeu = plotFxn(PlotDF$PutNeu_CountVariants, "Count Variants")
+CountVar_PutDel = plotFxn(PlotDF, PlotDF$PutDel_CountVariants, "Count Variants") 
+CountVar_PutNeu = plotFxn(PlotDF, PlotDF$PutNeu_CountVariants, "Count Variants")
 
-CountAllele_PutDel = plotFxn(PlotDF$PutDel_CountAlleles, "Count Alleles") 
-CountAllele_PutNeu = plotFxn(PlotDF$PutNeu_CountAlleles, "Count Alleles")
+CountAllele_PutDel = plotFxn(PlotDF, PlotDF$PutDel_CountAlleles, "Count Alleles") 
+CountAllele_PutNeu = plotFxn(PlotDF, PlotDF$PutNeu_CountAlleles, "Count Alleles")
 
 #Neutral
 putNeu = ggarrange( CountDerHom_PutNeu + theme(axis.title.y=element_blank(), axis.title.x=element_blank()) + ggtitle("Count Homozygotes"),
@@ -87,10 +83,34 @@ putDelAnnot = annotate_figure(putDel, left = text_grob("Deleterious", size=24, f
 ggarrange(putNeuAnnot, putDelAnnot, nrow = 2)
 
 #arrange the three scaled derived allele count plots in a single row
-ggarrange( pSY,
-           pNS + theme(axis.title.y=element_blank()),
-           pLOF + theme(axis.title.y=element_blank()),
-           align = 'hv',
-           labels = c("A", "B", "C"),
-           hjust = -1,
-           nrow = 1)
+CountDerHom_NS = plotFxn(ScaledPlotDF, ScaledPlotDF$NS_CountDerHom, "Count Derived Homozygotes") 
+CountDerHom_SY = plotFxn(ScaledPlotDF, ScaledPlotDF$SY_CountDerHom, "Count Derived Homozygotes")
+
+CountVar_NS = plotFxn(ScaledPlotDF, ScaledPlotDF$NS_CountVariants, "Count Variants") 
+CountVar_SY = plotFxn(ScaledPlotDF, ScaledPlotDF$SY_CountVariants, "Count Variants")
+
+CountAllele_NS = plotFxn(ScaledPlotDF, ScaledPlotDF$NS_CountAlleles, "Count Alleles") 
+CountAllele_SY = plotFxn(ScaledPlotDF, ScaledPlotDF$SY_CountAlleles, "Count Alleles")
+
+#Neutral
+SY = ggarrange( CountDerHom_SY + theme(axis.title.y=element_blank(), axis.title.x=element_blank()) + ggtitle("Count Homozygotes"),
+                    CountVar_SY + theme(axis.title.y=element_blank(), axis.title.x=element_blank()) + ggtitle("Count Variants"),
+                    CountAllele_SY + theme(axis.title.y=element_blank(), axis.title.x=element_blank()) + ggtitle("Count Alleles"),
+                    align = 'hv',
+                    labels = c("A", "B", "C"),
+                    hjust = -1,
+                    nrow = 1)
+SYAnnot = annotate_figure(SY, left = text_grob("Synonymous", size=24, face="bold",rot = 90, hjust = 0.5))
+
+#Deleterious
+NS = ggarrange( CountDerHom_NS + theme(axis.title.y=element_blank(), axis.title.x=element_blank()),
+                    CountVar_NS + theme(axis.title.y=element_blank(), axis.title.x=element_blank()),
+                    CountAllele_NS + theme(axis.title.y=element_blank(), axis.title.x=element_blank()),
+                    align = 'hv',
+                    labels = c("D", "E", "F"),
+                    hjust = -1,
+                    nrow = 1)
+NSAnnot = annotate_figure(NS, left = text_grob("Nonsynonymous", size=24, face="bold",rot = 90, hjust = 0.5))
+
+#plot deleterious and neutral
+ggarrange(SYAnnot, NSAnnot, nrow = 2)
