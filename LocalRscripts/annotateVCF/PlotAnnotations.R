@@ -29,7 +29,7 @@ plotFxn = function(dataFrame, colOfInterest, axisTitle) {
 }
 
 #Read file in 
-df = read.delim("~/Documents/DogProject_Clare/LocalRscripts/annotateVCF/AllChroms/GTAnnotationCountResults_May2019_DogProjClare.txt", stringsAsFactors = F)
+df = read.delim("~/Documents/DogProject_Clare/LocalRscripts/annotateVCF/AllChroms/GTAnnotationCountResults_June2020_DogProjClare.txt", stringsAsFactors = F)
 
 ####Make Plotting Data Frame
 PlotDF = df %>% 
@@ -41,7 +41,7 @@ orderPops = c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "
 PlotDF$Population = factor(PlotDF$Population, levels = orderPops)
 
 ####Make Everything proportional 
-PropPlotDF = PlotDF[,c(1:11, 20:25)] %>%
+PropPlotDF = PlotDF[,c(1:11, 20:31)] %>%
   mutate_at(vars(LOF_CountAlleles: PutNeu_CountVariants), list(~./PlotDF$CallableSites)) #Just run replace on plotting fxns with regular df to make everything proportional
 
 ####Make Scaled Count Alleles
@@ -122,7 +122,7 @@ PlotDF$Population = mgsub(as.character(PlotDF$Population),
                           pattern =c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "Arctic Wolf",  "Ethiopian Wolf", "Isle Royale"),
                           replacement =c("Dog", "Dog", "Dog", "Dog", "Wolf", "EW", "Wolf"))
 
-means = PlotDF[,c(1:11, 20:25)] %>%
+means = PlotDF[,c(1:11, 20:31)] %>%
   group_by(Population) %>%
   summarise_at(vars(PutDel_CountAlleles:PutNeu_CountVariants), list(~mean(.x)))
 
