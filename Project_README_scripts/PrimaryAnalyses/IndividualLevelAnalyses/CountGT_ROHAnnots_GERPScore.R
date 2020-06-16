@@ -151,7 +151,7 @@ PerPopulationOR = allIndivDF %>%
             OR_AlleleCopies_1Mb =(sum(SY_CountAlleles_nonROH1Mb)*sum(NS_CountAlleles_ROH1Mb))/(sum(SY_CountAlleles_ROH1Mb)*sum(NS_CountAlleles_nonROH1Mb)),
             OR_Variants_1Mb = (sum(SY_CountVariants_nonROH1Mb)*sum(NS_CountVariants_ROH1Mb))/(sum(SY_CountVariants_ROH1Mb)*sum(NS_CountVariants_nonROH1Mb)),
             OR_DerHom_1Mb = (sum(SY_CountDerHom_nonROH1Mb)*sum(NS_CountDerHom_ROH1Mb))/(sum(SY_CountDerHom_ROH1Mb)*sum(NS_CountDerHom_nonROH1Mb))) %>%
-  mutate(Population = mgsub_dict(Population, conversions =  list("BC" = "Border Collie", "LB" = "Labrador Retriever", "PG" = "Pug", "TM" = "Tibetan Mastiff", "AW" = "Arctic Wolf", "EW" = "Ethiopian Wolf", "IR" = "Isle Royale"))) #Add population name back
+  mutate(Population = mgsub(Population, pattern =c("BC", "LB", "PG", "TM", "AW", "EW", "IR"), replacement =c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "Arctic Wolf",  "Ethiopian Wolf", "Isle Royale"))) #Add population name back
 
 #Write output file
 write.table(PerPopulationOR, file="/u/home/j/jmooney3/klohmueldata/jazlyn_data/DogProject_Clare/AnnotateGT/AllChroms/PerPopulationOR_June2020_DogProjClare.txt", quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
