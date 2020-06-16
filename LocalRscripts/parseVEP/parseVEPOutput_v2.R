@@ -50,7 +50,7 @@ df = read.delim(filenames[i]) %>%
     mutate(IMPACT = mgsub(IMPACT, c("0", "1", "2"), c("LOW", "MODERATE", "HIGH"),perl = TRUE), #change the impact column back to original annot
        SNPEFF = snpEffAnnot$annot[match(CHROM_POS,snpEffAnnot$chrom_pos)], #grab annotation from Eduardo's snpEFF file
        SIFT_SCORE = suppressWarnings(as.numeric(gsub("-", "NA", SIFT, perl = TRUE))), #make sift score numeric NAs get introduced so I supress the warning
-       SIFT_CONSEQUENCE = ifelse(as.numeric(SIFT) > 0.5, "benign", "deleterious")) %>% #classify missense mutations as benign or damaging based on sift score
+       SIFT_CONSEQUENCE = ifelse(as.numeric(SIFT) >= 0.5, "benign", "deleterious")) %>% #classify missense mutations as benign or damaging based on sift score
     separate(CHROM_POS, c("CHROM", "POS"), sep = "_") %>% 
     select(CHROM, POS, Consequence, IMPACT, SIFT_SCORE, SIFT_CONSEQUENCE, SYMBOL, Gene, CANONICAL, SNPEFF) %>% #keep columns I want
     plyr::rename(c("Consequence"="CONSEQUENCE", "Gene"="GENE")) #rename columns
