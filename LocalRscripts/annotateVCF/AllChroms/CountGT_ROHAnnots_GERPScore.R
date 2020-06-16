@@ -140,7 +140,7 @@ SIFTAnnot =   annots %>%
 }
 
 #Write output file
-write.table(allIndivDF, file="/u/home/j/jmooney3/klohmueldata/jazlyn_data/DogProject_Clare/AnnotateGT/AllChroms/GTAnnotationCountResults_May2019_DogProjClare.txt", quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+write.table(allIndivDF, file="/u/home/j/jmooney3/klohmueldata/jazlyn_data/DogProject_Clare/AnnotateGT/AllChroms/GTAnnotationCountResults_June2020_DogProjClare.txt", quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
 
 #Calculate OR for entire population
 PerPopulationOR = allIndivDF %>%
@@ -154,6 +154,6 @@ PerPopulationOR = allIndivDF %>%
   mutate(Population = mgsub_dict(Population, conversions =  list("BC" = "Border Collie", "LB" = "Labrador Retriever", "PG" = "Pug", "TM" = "Tibetan Mastiff", "AW" = "Arctic Wolf", "EW" = "Ethiopian Wolf", "IR" = "Isle Royale"))) #Add population name back
 
 #Write output file
-write.table(PerPopulationOR, file="/u/home/j/jmooney3/klohmueldata/jazlyn_data/DogProject_Clare/AnnotateGT/AllChroms/PerPopulationOR_May2019_DogProjClare.txt", quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+write.table(PerPopulationOR, file="/u/home/j/jmooney3/klohmueldata/jazlyn_data/DogProject_Clare/AnnotateGT/AllChroms/PerPopulationOR_June2020_DogProjClare.txt", quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
 
 
