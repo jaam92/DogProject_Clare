@@ -114,3 +114,31 @@ NSAnnot = annotate_figure(NS, left = text_grob("Nonsynonymous", size=24, face="b
 
 #plot deleterious and neutral
 ggarrange(SYAnnot, NSAnnot, nrow = 2)
+
+
+
+#Compute pvalues
+PlotDF$Population = mgsub(as.character(PlotDF$Population), 
+                          pattern =c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "Arctic Wolf",  "Ethiopian Wolf", "Isle Royale"),
+                          replacement =c("Dog", "Dog", "Dog", "Dog", "Wolf", "EW", "Wolf"))
+
+means = PlotDF[,c(1:11, 20:25)] %>%
+  group_by(Population) %>%
+  summarise_at(vars(PutDel_CountAlleles:PutNeu_CountVariants), list(~mean(.x)))
+
+#Deleterious Count Hom
+793.3000/506.1220 #dog
+793.3000/448.5417 #wolf
+pairwise.wilcox.test(PlotDF$PutDel_CountDerHom, PlotDF$Population, p.adj = "bonf")$p.value
+
+#Deleterious Count Vars
+976.3000/861.2195 #dog
+976.3000/976.0417 #wolf
+pairwise.wilcox.test(PlotDF$PutDel_CountVariants, PlotDF$Population, p.adj = "bonf")$p.value
+
+
+#Deleterious Count Alleles
+1769.600/1367.341 #dog
+1769.600/1424.583 #wolf
+pairwise.wilcox.test(PlotDF$PutDel_CountAlleles, PlotDF$Population, p.adj = "bonf")$p.value
+  
