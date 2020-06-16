@@ -4,8 +4,8 @@
 ####Output file: File with above information for all individuals and a file with OR for different counting methods split by population 
 
 #Load Libraries
-library(dplyr)
 library(data.table)
+library(dplyr)
 library(mgsub)
 library(reshape2)
 library(tidyr)
@@ -24,7 +24,7 @@ for (i in 1:length(filenames)){
   annots = read.delim(file = filenames[i])
   
   #Grab individual ID
-  iid = mgsub_dict(filenames[i], conversions = list("annotatedGTwithVEP_" = "", "_allChroms.txt"="")) 
+  iid = mgsub(filenames[i], pattern=c("annotatedGTwithVEP_", "_allChroms.txt"), replacement=c("","")) 
   
 ####Grab counts ROH of at least 10Kb
   CountDF_withROH = annots %>%
@@ -80,7 +80,25 @@ for (i in 1:length(filenames)){
     count() %>%
     spread(GT,n) %>%
     mutate(LineCount = dim(annots)[1])
-  
+
+####Counts using SIFT
+SIFTAnnot =   annots %>% 
+    na.omit(SIFT) %>%
+    filter(GT != "AncHom", GT != "Missing") %>%
+    mutate(SIFTAnnot = ifelse(ANNOT == "NS" & SIFT == "deleterious", "PutDel", "PutNeu")) %>% 
+    group_by(GT,SIFTAnnot) %>%
+    count() %>%
+    mutate(CountAlleles = ifelse(GT == "DerHom", as.numeric(n)*2, as.numeric(n)),
+           CountDerHom = ifelse(GT == "DerHom", as.numeric(n), as.numeric(0))) %>%
+    group_by(SIFTAnnot) %>%
+    summarise_at(.vars= vars(n, CountAlleles, CountDerHom), .funs = sum) %>%
+    plyr::rename(c("n"="CountVariants")) %>%
+    melt(id.vars=c("SIFTAnnot")) %>% #convert table from wide to long
+    arrange(SIFTAnnot) %>% #order by annotation
+    mutate(NewColName = paste(SIFTAnnot,"SIFT_",variable, sep = "")) %>%
+    select(NewColName,value) %>% #only keep new col and values
+    spread(NewColName,value)
+
 ####Counts GERP Scores
   GERPScore = annots %>%
     filter(GERPScore >= 4 | GERPScore <= 2, GT != "AncHom", GT != "Missing") %>%
@@ -105,7 +123,7 @@ for (i in 1:length(filenames)){
     mutate(NewColName = paste(ANNOT,"_",variable, sep = "")) %>%
     select(NewColName,value) %>% #only keep new col and values
     spread(NewColName,value) %>% #make data one row
-    cbind(Calls,ImpactCounts,GERPScore,ROHStats_10Kb,ROHStats_1Mb) %>% #add on total calls and impact counts
+    cbind(Calls,ImpactCounts,SIFTAnnot,GERPScore,ROHStats_10Kb,ROHStats_1Mb) %>% #add on total calls and impact counts
     mutate(ID = iid, 
            Population = substr(iid,1,2),
            OR_AlleleCopies = (SY_CountAlleles_nonROH*NS_CountAlleles_ROH)/(SY_CountAlleles_ROH*NS_CountAlleles_nonROH),
@@ -122,7 +140,7 @@ for (i in 1:length(filenames)){
 }
 
 #Write output file
-write.table(allIndivDF, file="/u/home/j/jmooney3/klohmueldata/jazlyn_data/DogProject_Clare/AnnotateGT/AllChroms/GTAnnotationCountResults_Dec2018_DogProjClare.txt", quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+write.table(allIndivDF, file="/u/home/j/jmooney3/klohmueldata/jazlyn_data/DogProject_Clare/AnnotateGT/AllChroms/GTAnnotationCountResults_June2020_DogProjClare.txt", quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
 
 #Calculate OR for entire population
 PerPopulationOR = allIndivDF %>%
@@ -136,6 +154,6 @@ PerPopulationOR = allIndivDF %>%
   mutate(Population = mgsub_dict(Population, conversions =  list("BC" = "Border Collie", "LB" = "Labrador Retriever", "PG" = "Pug", "TM" = "Tibetan Mastiff", "AW" = "Arctic Wolf", "EW" = "Ethiopian Wolf", "IR" = "Isle Royale"))) #Add population name back
 
 #Write output file
-write.table(PerPopulationOR, file="/u/home/j/jmooney3/klohmueldata/jazlyn_data/DogProject_Clare/AnnotateGT/AllChroms/PerPopulationOR_Dec2018_DogProjClare.txt", quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+write.table(PerPopulationOR, file="/u/home/j/jmooney3/klohmueldata/jazlyn_data/DogProject_Clare/AnnotateGT/AllChroms/PerPopulationOR_June2020_DogProjClare.txt", quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
 
 
