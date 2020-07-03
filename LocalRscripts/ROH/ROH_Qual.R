@@ -177,10 +177,10 @@ plotROHRanges = function(dataFrame){
 
 #ROH Ranges plots
 ROHRangePlot = plotROHRanges(FinalDF) #plot all individuals
-ROHRangePlot_TM = plotROHRanges(FinalDF %>% filter(Population == "Tibetan Mastiff"))
-ROHRangePlot_LB = plotROHRanges(FinalDF %>% filter(Population == "Labrador Retriever"))
-ROHRangePlot_BC = plotROHRanges(FinalDF %>% filter(Population == "Border Collie"))
-ROHRangePlot_PG = plotROHRanges(FinalDF %>% filter(Population == "Pug"))
-ROHRangePlot_AW = plotROHRanges(FinalDF %>% filter(Population == "Arctic Wolf"))
-ROHRangePlot_IR = plotROHRanges(FinalDF %>% filter(Population == "Isle Royale"))
-ROHRangePlot_EW = plotROHRanges(FinalDF %>% filter(Population == "Ethiopian Wolf"))
+ROHRangePlot_TM = plotROHRanges(FinalDF %>% filter(Population == "Tibetan Mastiff")) + ylim(0,1.3)
+ROHRangePlot_LB = plotROHRanges(FinalDF %>% filter(Population == "Labrador Retriever")) + ylim(0,1.3)
+ROHRangePlot_BC = plotROHRanges(FinalDF %>% filter(Population == "Border Collie")) + ylim(0,1.3)
+ROHRangePlot_PG = plotROHRanges(FinalDF %>% filter(Population == "Pug")) + ylim(0,1.3)
+ROHRangePlot_AW = plotROHRanges(FinalDF %>% filter(Population == "Arctic Wolf")) + ylim(0,1.3)
+ROHRangePlot_IR = plotROHRanges(FinalDF %>% filter(Population == "Isle Royale")) + ylim(0,1.3)
+ROHRangePlot_EW = plotROHRanges(FinalDF %>% filter(Population == "Ethiopian Wolf")) + ylim(0,1.3)
