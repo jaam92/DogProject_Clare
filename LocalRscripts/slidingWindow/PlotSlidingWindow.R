@@ -76,7 +76,12 @@ plotFunction = function(dataFrame, indiv, color1, color2) {
     scale_y_continuous(expand = c(0, 0)) + # remove space between plot area and x axis
     labs(x = "Chromosome", y = "Heterozygosity(per bp)") +
     theme_bw() +
-    theme(panel.border = element_blank(), panel.grid.major.x = element_blank(),panel.grid.minor.x = element_blank(), legend.position = "none")
+    theme(axis.text.x = element_text(size = 28),
+          axis.text.y = element_text(size = 28),
+          panel.border = element_blank(), 
+          panel.grid.major.x = element_blank(),
+          panel.grid.minor.x = element_blank(), 
+          legend.position = "none")
   return(indivHet)
 }
 
