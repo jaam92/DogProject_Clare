@@ -89,8 +89,8 @@ WolfOnlySFS = ggplot(PlottingFolded %>%
   labs(x= "SNP Frequency", y= "Proportion of SNPs") + 
   ggtitle("Wolves Whole Genome SFS") + 
   theme_bw() + 
-  theme(axis.text.x = element_text(size  = 20), 
-        axis.text.y = element_text(size  = 20), 
+  theme(axis.text.x = element_text(size  = 24), 
+        axis.text.y = element_text(size  = 24), 
         plot.title=element_text(size=26, face = "bold", hjust=0.5), 
         axis.title=element_text(size=24),
         legend.title=element_text(size=20), 
