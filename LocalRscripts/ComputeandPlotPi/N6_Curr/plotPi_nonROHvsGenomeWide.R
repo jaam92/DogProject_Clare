@@ -69,7 +69,7 @@ plotGW = ggplot(plotDF %>%
   theme(axis.text.x = element_text(size  = 24), 
         axis.text.y = element_text(size  = 24), 
         plot.title=element_text(size=24), 
-        axis.title=element_text(size=24),
+        axis.title=element_text(size=26),
         legend.title=element_text(size=20), 
         legend.text=element_text(size=20))
 

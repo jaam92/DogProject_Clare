@@ -92,7 +92,7 @@ WolfOnlySFS = ggplot(PlottingFolded %>%
   theme(axis.text.x = element_text(size  = 24), 
         axis.text.y = element_text(size  = 24), 
         plot.title=element_text(size=26, face = "bold", hjust=0.5), 
-        axis.title=element_text(size=24),
+        axis.title=element_text(size=26),
         legend.title=element_text(size=20), 
         legend.text=element_text(size=20)) +
   scale_x_continuous(breaks = c(1,2,3,4,5,6))
