@@ -5,8 +5,8 @@ library(mgsub)
 library(corrplot)
 
 #read file in
-setwd("~/Documents/DogProject_Clare/LocalRscripts/Fst")
-df = read.table("~/Documents/DogProject_Clare/LocalRscripts/Fst/pairwiseFst_reformat.out", header = T, stringsAsFactors=FALSE) %>%
+setwd("~/Documents/DogProject_Clare/LocalRscripts/pairwiseFst")
+df = read.table("~/Documents/DogProject_Clare/LocalRscripts/pairwiseFst/pairwiseFst_reformat.out", header = T, stringsAsFactors=FALSE) %>%
   mutate(B1 = mgsub(B1, pattern =c("BC", "LB", "PG", "TM", "AW", "EW", "IR"), replacement =c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "Arctic Wolf",  "Ethiopian Wolf", "Isle Royale")),
          B2 = mgsub(B2, pattern =c("BC", "LB", "PG", "TM", "AW", "EW", "IR"), replacement =c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "Arctic Wolf",  "Ethiopian Wolf", "Isle Royale")))
 
