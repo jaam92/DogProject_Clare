@@ -66,8 +66,8 @@ plotGW = ggplot(plotDF %>%
   scale_colour_manual(name = "Population", values = cbPalette) + 
   theme_bw() + 
   labs(x= "Population",y = expression(pi)) + 
-  theme(axis.text.x = element_text(size  = 20), 
-        axis.text.y = element_text(size  = 20), 
+  theme(axis.text.x = element_text(size  = 24), 
+        axis.text.y = element_text(size  = 24), 
         plot.title=element_text(size=24), 
         axis.title=element_text(size=24),
         legend.title=element_text(size=20), 
