@@ -74,7 +74,7 @@ ggd1 = as.ggdend(dend)
   
 IBSTree = ggplot(ggd1, horiz = F) + 
     theme(axis.text.x = element_blank(), 
-          axis.text.y = element_text(size  = 20),
+          axis.text.y = element_text(size = 24),
           axis.title=element_text(size=24))
 
 
