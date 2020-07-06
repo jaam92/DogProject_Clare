@@ -174,7 +174,7 @@ comboDF = rbind.data.frame(subsetReal,subsetSim)
 CompDataS = ggplot(data=comboDF %>% filter(bin <= 13), aes(x=bin, y=propSites,fill=Data)) + 
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() + 
-  labs(x=expression(Theta[W]), y=expression(Proportion~of~Theta[W])) +
+  labs(x="Count of S", y="Proportion of Total S") +
   theme(axis.text.x = element_text(size  = 20), 
         axis.text.y = element_text(size = 20), 
         axis.title = element_text(size = 24), 
@@ -187,7 +187,7 @@ CompDataS = ggplot(data=comboDF %>% filter(bin <= 13), aes(x=bin, y=propSites,fi
 CompDataS_zoom = ggplot(data=comboDF %>% filter(bin > 0 & bin < 13), aes(x=bin, y=propSites,fill=Data)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() +
-  labs(x=expression(Theta[W]), y=expression(Proportion~of~Theta[W])) +
+  labs(x="Count of S", y="Proportion of Total S") +
   theme(axis.text.x = element_text(size  = 20), 
         axis.text.y = element_text(size = 20), 
         axis.title = element_text(size = 24), 
@@ -304,7 +304,7 @@ VisualizeABC = ggplot() +
              color="red", 
              size=2) + 
   theme_bw() +
-  labs(x=expression(Theta[W]), y=expression(pi)) +
+  labs(x="S", y=expression(pi)) +
   theme(axis.text.x = element_text(size  = 20), 
         axis.text.y = element_text(size = 20), 
         axis.title = element_text(size=24, face = "bold"), 
