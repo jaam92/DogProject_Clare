@@ -90,8 +90,8 @@ ABCSummaryTable = ggtexttable(credibleIntervals, rows = NULL)
 #Plotting Function for posterior
 plotPosterior <- function(title, xAxisTitle, parameterPrior, colorPrior, parameterPosterior, colorPosterior, modePosterior ){
   ggplot() + 
-    geom_density(data = sampPriors, aes(x = parameterPrior), colour=colorPrior,size=1) +
-    geom_density(data = Top200, aes(x = parameterPosterior), colour=colorPosterior) +
+    geom_density(data = sampPriors, aes(x = parameterPrior), colour=colorPrior,size=1, outline.type = "full") +
+    geom_density(data = Top200, aes(x = parameterPosterior), colour=colorPosterior, outline.type = "full") +
     geom_vline(xintercept = modePosterior, colour="purple") +
     ggtitle(title) +
     xlab(xAxisTitle) +
@@ -255,6 +255,7 @@ plotAll = ggarrange(CompDataS,
                     common.legend = TRUE,
                     legend = "bottom")
 
+ggarrange(plotAll, plotPosteriorTogether, ncol = 2)
 
 ###Plot joint distribution
 meanSumStatEmpirical = realData %>%
