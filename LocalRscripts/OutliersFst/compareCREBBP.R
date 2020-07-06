@@ -229,10 +229,10 @@ HIFOutliers = ggarrange(CREBBP_1Mb + labs(x = "", y = "", title = ""),
               MKL1_1Mb + labs(x = "", y = "", title = ""),
               PYGB_1Mb + labs(x = "", y = "", title = ""),
               CDK8_1Mb + labs(x = "", y = "", title = ""),
-              GRB2_1Mb + labs(x = "", y = "", title = "") + theme(axis.text.x = element_blank()),
+              #GRB2_1Mb + labs(x = "", y = "", title = "") + theme(axis.text.x = element_blank()),
               align = 'v',
               ncol = 2, 
-              nrow = 3)
+              nrow = 2)
 
 annotatedHIFOutliers = annotate_figure(HIFOutliers,
                 left = text_grob("Number of Derived Homozygous Fixed Sites Per Gene", 
