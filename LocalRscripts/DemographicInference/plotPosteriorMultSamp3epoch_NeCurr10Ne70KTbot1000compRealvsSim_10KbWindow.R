@@ -178,7 +178,7 @@ CompDataS = ggplot(data=comboDF %>% filter(bin <= 13), aes(x=bin, y=propSites,fi
   labs(x="Count Segregating Sites", y="Proportion of Total Segregating sites") +
   theme(axis.text.x = element_text(size  = 20), 
         axis.text.y = element_text(size = 20), 
-        axis.title=element_text(size=24, face = "bold"), 
+        axis.title=element_text(size=24), 
         plot.title = element_text(size=24, hjust = 0.5),
         legend.title=element_blank(), 
         legend.text=element_text(size=20)) +
@@ -191,7 +191,7 @@ CompDataS_zoom = ggplot(data=comboDF %>% filter(bin > 0 & bin < 13), aes(x=bin, 
   labs(x="Count Segregating Sites", y="Proportion of Total Segregating sites") +
   theme(axis.text.x = element_text(size  = 20), 
         axis.text.y = element_text(size = 20), 
-        axis.title=element_text(size=24, face = "bold"), 
+        axis.title=element_text(size=24), 
         plot.title = element_text(size=24, hjust = 0.5),
         legend.title=element_blank(),
         legend.text=element_text(size=20)) + 
@@ -226,7 +226,7 @@ CompDataPi = ggplot(data=comboDF_pi %>% filter(bin <= 12), aes(x=intervals, y=pr
   labs(x="Interval", y=expression(Proportion ~ Simulations ~ pi)) +
   theme(axis.text.x = element_text(size  = 20, angle = 90, hjust = 0.5), 
         axis.text.y = element_text(size = 20), 
-        axis.title = element_text(size=24, face = "bold"), 
+        axis.title = element_text(size=24), 
         plot.title = element_text(size=24, hjust = 0.5),
         legend.title = element_blank(), 
         legend.text=element_text(size=20)) + 
@@ -238,7 +238,7 @@ CompDataPi_zoom = ggplot(data=comboDF_pi %>% filter(bin > 0 & bin <= 12), aes(x=
   labs(x="Interval", y=expression(Proportion ~ Simulations ~ pi)) +
   theme(axis.text.x = element_text(size  = 20, angle = 90, hjust = 0.5), 
         axis.text.y = element_text(size = 20), 
-        axis.title = element_text(size=24, face = "bold"), 
+        axis.title = element_text(size=24), 
         plot.title = element_text(size=24, hjust = 0.5),
         legend.title=element_blank(), 
         legend.text=element_text(size=20)) + 
@@ -311,34 +311,6 @@ VisualizeABC = ggplot() +
         plot.title = element_text(size=24, hjust = 0.5),
         legend.title=element_blank(), 
         legend.text=element_text(size=20))
-
-#Plot demographic model
-d=data.frame(x1=c(5.25,5,4.5), 
-             x2=c(5.8,6,6.5), 
-             y1=c(1,3,8), 
-             y2=c(3,8,13))
-
-DemographicModel = ggplot() + 
-  scale_x_continuous(name="x") + 
-  scale_y_continuous(name="y") +
-  geom_rect(data=d, 
-            mapping=aes(xmin=x1, 
-                        xmax=x2, 
-                        ymin=y1, 
-                        ymax=y2, 
-                        fill=t), 
-            fill="blue", 
-            alpha=0.8) +
-  theme_bw() +
-  theme(line = element_blank(),
-        text = element_blank(),
-        title = element_blank())
-
-ABCandDemog = ggarrange(DemographicModel, VisualizeABC + theme(legend.position = "bottom"),
-                        nrow = 2, 
-                        ncol = 1,
-                        labels = c("A","B"),
-                        align = 'v')
 
 #Option 2 to generate an hpd set of level p, based on a sample x from the posterior
 

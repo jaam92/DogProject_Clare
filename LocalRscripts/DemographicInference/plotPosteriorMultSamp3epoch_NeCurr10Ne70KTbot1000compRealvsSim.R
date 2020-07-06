@@ -86,6 +86,7 @@ credibleIntervals$Param = c("Ancient population size", "Ancient bottleneck (gene
 colnames(credibleIntervals) = c("Parameter", "Point Estimate", "Lower Bound (95% CI)", "Upper Bound (95% CI)")
 ABCSummaryTable = ggtexttable(credibleIntervals, rows = NULL)
 
+
 #Plotting Function for posterior
 plotPosterior <- function(title, xAxisTitle, parameterPrior, colorPrior, parameterPosterior, colorPosterior, modePosterior ){
   ggplot() + 
@@ -101,15 +102,15 @@ plotPosterior <- function(title, xAxisTitle, parameterPrior, colorPrior, paramet
           plot.title = element_text(size=24, hjust = 0.5, face = "bold"))
 }
 
-plotPosteriorNe1 = plotPosterior(paste("Mode of Posterior = ", modePosteriorNe1), expression(paste(Ne[Current])), sampPriors$Ne1, "blue", Top200$SimNeOne, "black", modePosteriorNe1)
+plotPosteriorNe1 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[5,2]), expression(paste(Ne[Current])), sampPriors$Ne1, "blue", Top200$SimNeOne, "black", credibleIntervals[5,2])
 
-plotPosteriorNe2 = plotPosterior(paste("Mode of Posterior = ", modePosteriorNe2), expression(paste(Ne[2])), sampPriors$Ne2, "blue", Top200$SimNeTwo, "black", modePosteriorNe2)
+plotPosteriorNe2 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[3,2]), expression(paste(Ne[2])), sampPriors$Ne2, "blue", Top200$SimNeTwo, "black", credibleIntervals[3,2])
 
-plotPosteriorNe3 = plotPosterior(paste("Mode of Posterior = ", modePosteriorNe3), expression(paste(Ne[3])), sampPriors$Ne3, "blue", Top200$SimNeThree, "black", modePosteriorNe3)
+plotPosteriorNe3 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[1,2]), expression(paste(Ne[3])), sampPriors$Ne3, "blue", Top200$SimNeThree, "black", credibleIntervals[1,2])
 
-plotPosteriorTbot1 = plotPosterior(paste("Mode of Posterior = ", modePosteriorTbot1), expression(paste(T[bottleneck])), sampPriors$Tbot, "blue", Top200$SimTimeOne, "black", modePosteriorTbot1)
+plotPosteriorTbot1 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[4,2]), expression(paste(T[bottleneck])), sampPriors$Tbot, "blue", Top200$SimTimeOne, "black", credibleIntervals[4,2])
 
-plotPosteriorTbot2 = plotPosterior(paste("Mode of Posterior = ", modePosteriorTbot2), expression(paste(T[bottleneck2])), sampPriors$Tbot2, "blue", Top200$SimTimeTwo, "black", modePosteriorTbot2)
+plotPosteriorTbot2 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[2,2]), expression(paste(T[bottleneck2])), sampPriors$Tbot2, "blue", Top200$SimTimeTwo, "black", credibleIntervals[2,2])
 
 plotPosteriorTogether = ggarrange(plotPosteriorNe1  + ylab(""),
                                   plotPosteriorTbot1  + ylab(""), 
@@ -173,7 +174,7 @@ comboDF = rbind.data.frame(subsetReal,subsetSim)
 CompDataS = ggplot(data=comboDF %>% filter(bin <= 13), aes(x=bin, y=propSites,fill=Data)) + 
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() + 
-  labs(x="Count Segregating Sites", y="Proportion of Total Segregating sites") +
+  labs(x=expression(Theta[W]), y=expression(Proportion~of~Theta[W])) +
   theme(axis.text.x = element_text(size  = 20), 
         axis.text.y = element_text(size = 20), 
         axis.title = element_text(size = 24), 
@@ -186,7 +187,7 @@ CompDataS = ggplot(data=comboDF %>% filter(bin <= 13), aes(x=bin, y=propSites,fi
 CompDataS_zoom = ggplot(data=comboDF %>% filter(bin > 0 & bin < 13), aes(x=bin, y=propSites,fill=Data)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() +
-  labs(x="Count Segregating Sites", y="Proportion of Total Segregating sites") +
+  labs(x=expression(Theta[W]), y=expression(Proportion~of~Theta[W])) +
   theme(axis.text.x = element_text(size  = 20), 
         axis.text.y = element_text(size = 20), 
         axis.title = element_text(size = 24), 
@@ -221,7 +222,7 @@ comboDF_pi$intervals = factor(comboDF_pi$intervals, levels = rangesDF$ranges) #o
 CompDataPi = ggplot(data=comboDF_pi %>% filter(bin <= 12), aes(x=intervals, y=propSites,fill=Data)) + 
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() + 
-  labs(x="Interval", y=expression(Proportion ~ Simulations ~ pi)) +
+  labs(x=expression(Interval~pi), y=expression(Proportion~pi)) +
   theme(axis.text.x = element_text(size = 20, angle = 90, hjust = 0.5), 
         axis.text.y = element_text(size = 20), 
         axis.title = element_text(size = 24), 
@@ -233,7 +234,7 @@ CompDataPi = ggplot(data=comboDF_pi %>% filter(bin <= 12), aes(x=intervals, y=pr
 CompDataPi_zoom = ggplot(data=comboDF_pi %>% filter(bin > 0 & bin <= 12), aes(x=intervals, y=propSites,fill=Data)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() + 
-  labs(x="Interval", y=expression(Proportion ~ Simulations ~ pi)) +
+  labs(x=expression(Interval~pi), y=expression(Proportion~pi)) +
   theme(axis.text.x = element_text(size  = 20, angle = 90, hjust = 0.5), 
         axis.text.y = element_text(size = 20), 
         axis.title = element_text(size=24), 
@@ -310,33 +311,7 @@ VisualizeABC = ggplot() +
         legend.title=element_blank(), 
         legend.text=element_text(size=20))
 
-#Plot demographic model
-d=data.frame(x1=c(5.25,5,4.5), 
-             x2=c(5.8,6,6.5), 
-             y1=c(1,3,8), 
-             y2=c(3,8,13))
 
-DemographicModel = ggplot() + 
-  scale_x_continuous(name="x") + 
-  scale_y_continuous(name="y") +
-  geom_rect(data=d, 
-            mapping=aes(xmin=x1, 
-                        xmax=x2, 
-                        ymin=y1, 
-                        ymax=y2, 
-                        fill=t), 
-            fill="blue", 
-            alpha=0.8) +
-  theme_bw() +
-  theme(line = element_blank(),
-        text = element_blank(),
-        title = element_blank())
-
-ABCandDemog = ggarrange(DemographicModel, VisualizeABC + theme(legend.position = "bottom"),
-                        nrow = 2, 
-                        ncol = 1,
-                        labels = c("A","B"),
-                        align = 'v')
 
 #Option 1 to generate an hpd set of level p, based on a sample x from the posterior
 #hpd<-function(x,p){
