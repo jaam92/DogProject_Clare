@@ -27,15 +27,15 @@ plotPrior <- function(xAxisTitle, title, parameter, color){
           plot.title = element_text(size=20, hjust = 0.5))
 }
 
-plotNe1 = plotPrior("unif(10,1000)", expression(paste(Ne[Current])), Ne1, "gray30")
+plotNe1 = plotPrior("unif(10,1000)", expression(paste(Ne[CURRENT])), Ne1, "gray30")
 
-plotNe2 = plotPrior("unif(1000,60000)", expression(paste(Ne[2])), Ne2, "gray30")
+plotNe2 = plotPrior("unif(1000,60000)", expression(paste(Ne[INTERMIDIATE])), Ne2, "gray30")
 
-plotNe3 = plotPrior("unif(40000,200000)", expression(paste(Ne[Ancestral])), Ne3, "gray30")
+plotNe3 = plotPrior("unif(40000,200000)", expression(paste(Ne[ANCIENT])), Ne3, "gray30")
 
-plotTbot = plotPrior("unif(10,1000)", expression(paste(T[bottleneck])), Tbot, "gray30")
+plotTbot = plotPrior("unif(10,1000)", expression(paste(TBOT[RECENT])), Tbot, "gray30")
 
-plotTbot2 = plotPrior("unif(1500,15000)", expression(paste(T[bottleneck2])), Tbot2, "gray30")
+plotTbot2 = plotPrior("unif(1500,15000)", expression(paste(TBOT[ANCIENT])), Tbot2, "gray30")
 
 plotPriorsTogether = ggarrange(plotNe1, 
                                plotTbot + ylab(""), 
