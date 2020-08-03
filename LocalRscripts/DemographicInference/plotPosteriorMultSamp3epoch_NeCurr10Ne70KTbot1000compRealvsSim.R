@@ -102,15 +102,15 @@ plotPosterior <- function(title, xAxisTitle, parameterPrior, colorPrior, paramet
           plot.title = element_text(size=24, hjust = 0.5, face = "bold"))
 }
 
-plotPosteriorNe1 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[5,2]), expression(paste(Ne[Current])), sampPriors$Ne1, "blue", Top200$SimNeOne, "black", credibleIntervals[5,2])
+plotPosteriorNe1 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[5,2]), expression(paste(N[CURRENT])), sampPriors$Ne1, "blue", Top200$SimNeOne, "black", credibleIntervals[5,2])
 
-plotPosteriorNe2 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[3,2]), expression(paste(Ne[2])), sampPriors$Ne2, "blue", Top200$SimNeTwo, "black", credibleIntervals[3,2])
+plotPosteriorNe2 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[3,2]), expression(paste(N[INTERMIDIATE])), sampPriors$Ne2, "blue", Top200$SimNeTwo, "black", credibleIntervals[3,2])
 
-plotPosteriorNe3 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[1,2]), expression(paste(Ne[3])), sampPriors$Ne3, "blue", Top200$SimNeThree, "black", credibleIntervals[1,2])
+plotPosteriorNe3 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[1,2]), expression(paste(N[ANCIENT])), sampPriors$Ne3, "blue", Top200$SimNeThree, "black", credibleIntervals[1,2])
 
-plotPosteriorTbot1 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[4,2]), expression(paste(T[bottleneck])), sampPriors$Tbot, "blue", Top200$SimTimeOne, "black", credibleIntervals[4,2])
+plotPosteriorTbot1 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[4,2]), expression(paste(TBOT[RECENT])), sampPriors$Tbot, "blue", Top200$SimTimeOne, "black", credibleIntervals[4,2])
 
-plotPosteriorTbot2 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[2,2]), expression(paste(T[bottleneck2])), sampPriors$Tbot2, "blue", Top200$SimTimeTwo, "black", credibleIntervals[2,2])
+plotPosteriorTbot2 = plotPosterior(paste("Mode of Posterior = ", credibleIntervals[2,2]), expression(paste(TBOT[ANCIENT])), sampPriors$Tbot2, "blue", Top200$SimTimeTwo, "black", credibleIntervals[2,2])
 
 plotPosteriorTogether = ggarrange(plotPosteriorNe1  + ylab(""),
                                   plotPosteriorTbot1  + ylab(""), 
