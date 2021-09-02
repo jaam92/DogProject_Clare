@@ -69,18 +69,37 @@ mergedDF_Fst = rbind.data.frame(BC_FstPerGene,TM_FstPerGene,AW_FstPerGene) %>%
 CREBBP_Fst = mergedDF_Fst %>%
   filter(GeneName == "CREBBP") 
 
-####Data frames for fixed sites
-#Ethiopian wolf versus arctic
-CountPerGene_EWvAW = compFixedSites("~/DogProject_Clare/LocalRscripts/OutliersFst/FixedSites_EWvsAW_N9.txt") %>%
-  filter(GeneName%in%EW_piPerGene$GeneName) #only compare against gene sets used for computing pi
+####Data frames for fixed sites sites can be fixed as follows:
+  #ANC in comp group and DER in EW
+  #ANC in EW and DER in comp group
+CountPerGene_EWvAW = compFixedSites("~/DogProject_Clare/LocalRscripts/OutliersFst/FixedSites_EWvsAW_N6.txt") %>%
+  filter(GeneName%in%EW_piPerGene$GeneName) %>% #only compare against gene sets used for computing pi
+  mutate(Population = "AW")
 
-CountPerGene_EWvTM = compFixedSites("~/DogProject_Clare/LocalRscripts/OutliersFst/FixedSites_EWvsTM_N9.txt") %>%
-  filter(GeneName%in%EW_piPerGene$GeneName) #only compare against gene sets used for computing pi
+CountPerGene_EWvTM = compFixedSites("~/DogProject_Clare/LocalRscripts/OutliersFst/FixedSites_EWvsTM_N6.txt") %>%
+  filter(GeneName%in%EW_piPerGene$GeneName)  %>% 
+  mutate(Population = "TM") %>%
+  na.omit()
 
+CountPerGene_EWvBC = compFixedSites("~/DogProject_Clare/LocalRscripts/OutliersFst/FixedSites_EWvsBC_N6.txt") %>%
+  filter(GeneName%in%EW_piPerGene$GeneName) %>% 
+  mutate(Population = "BC") %>%
+  na.omit()
 
-####Plots for pi
+mergedDF_FixedSites = rbind.data.frame(CountPerGene_EWvAW, CountPerGene_EWvTM, CountPerGene_EWvBC) %>%
+  mutate(fullPopName = case_when(Population == "AW" ~ "Ethiopian Wolf versus Arctic Wolf",
+                        Population == "BC" ~ "Ethiopian Wolf versus Border Collie",
+                        Population == "TM" ~ "Ethiopian Wolf versus Tibetan Mastiff")) %>%
+  na.omit()
+
+#data frame with CREBBP fixed sites
+CREBBP_FixedSites = mergedDF_FixedSites %>%
+  filter(GeneName == "CREBBP")
+
+####Start plotting
 cbPalette = c("Arctic Wolf" = "gray25", "Ethiopian Wolf" = "#D55E00",  "Isle Royale" = "steelblue", "Border Collie" = "#009E73", "Labrador Retriever" = "gold3", "Pug" = "mediumpurple4", "Tibetan Mastiff" = "#CC79A7")
 
+####Plots for pi
 #Histogram
 ggplot() +
   geom_density(data = AW_piPerGene, aes(x=meanPI), colour ="gray25") +
@@ -152,11 +171,12 @@ ggplot() +
 
 
 ####Plots for derived allele counts
+#Ethiopoan wolf versus arctic wolf
 ggplot(CountPerGene_EWvAW, aes(x=n)) + 
   geom_histogram(bins = 50) + 
   geom_vline(xintercept = 212, colour="purple") + #Count for CREBBP
-  ggtitle(paste0("p-value = ", round(digits = 3, x = nrow(CountPerGene_EWvAW[CountPerGene_EWvAW$n>212, ])/nrow(CountPerGene_EWvAW)))) +
-  labs(x="Number of Fixed Sites Per Gene (EW vs AW)") + 
+  ggtitle(paste0("p-value = ", round(digits = 3, x = nrow(CountPerGene_EWvAW[CountPerGene_EWvAW$n>=212, ])/nrow(CountPerGene_EWvAW)))) +
+  labs(x="Number of fixed sites per gene (EW vs AW)") + 
   theme_bw() + 
   theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 16), 
         axis.text.y = element_text(size = 16), 
@@ -164,13 +184,38 @@ ggplot(CountPerGene_EWvAW, aes(x=n)) +
         axis.title = element_text(size = 16))
 
 #Ethiopoan wolf versus tibetan mastiff
-ggplot(CountPerGene_EWvTM, aes(x=n)) + 
+ggplot(CountPerGene_EWvBC, aes(x=n)) + 
   geom_histogram(bins = 50) + 
-  geom_vline(xintercept = 72, colour="purple") + #Count for CREBBP
-  ggtitle(paste0("p-value = ", round(digits = 3, x = nrow(CountPerGene_EWvTM[CountPerGene_EWvTM$n>72, ])/nrow(CountPerGene_EWvTM)))) +
-  labs(x="Number of Fixed Sites Per Gene (EW vs TM)") + 
+  geom_vline(xintercept = 214, colour="purple") + #Count for CREBBP
+  ggtitle(paste0("p-value = ", round(digits = 3, x = nrow(CountPerGene_EWvTM[CountPerGene_EWvTM$n>=214, ])/nrow(CountPerGene_EWvTM)))) +
+  labs(x="Number of fixed sites per gene (EW vs TM)") + 
   theme_bw() + 
   theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 16), 
         axis.text.y = element_text(size = 16), 
         plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
         axis.title = element_text(size = 16))
+
+#Ethiopian wolf versus tibetan mastiff
+ggplot(CountPerGene_EWvTM, aes(x=n)) + 
+  geom_histogram(bins = 50) + 
+  geom_vline(xintercept = 121, colour="purple") + #Count for CREBBP
+  ggtitle(paste0("p-value = ", round(digits = 3, x = nrow(CountPerGene_EWvTM[CountPerGene_EWvTM$n>=121, ])/nrow(CountPerGene_EWvTM)))) +
+  labs(x="Number of fixed sites per gene (EW vs TM)") + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 16), 
+        axis.text.y = element_text(size = 16), 
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
+        axis.title = element_text(size = 16))
+
+#plot with populations as facets
+ggplot() + 
+  geom_histogram(data = mergedDF_FixedSites, aes(x=n), bins=100) +
+  geom_vline(data = CREBBP_FixedSites, aes(xintercept = n), colour="purple") + 
+  facet_wrap(~fullPopName, scale = "free") +
+  xlab("Number of fixed sites per gene") + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 16), 
+        axis.text.y = element_text(size = 16), 
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
+        axis.title = element_text(size = 16),
+        strip.text = element_text(size = 14))
