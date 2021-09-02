@@ -108,6 +108,33 @@ compFST = function(inFile){
   return(FstPerGene)
 }
 
+#####Functions to make dataframes and compare fixed sites
+compFixedSites = function(inFile){
+  
+  #read file in 
+  fixedSites = read_delim(file = inFile, delim = "\t") %>%
+    mutate(bin = row_number())
+  
+  #overlap genes
+  fixedPosRanges = with(fixedSites, GRanges(CHROM, IRanges(start=POS, end = POS)))
+  geneRanges = with(GeneSet, GRanges(chrom, IRanges(start=transcriptionStart, end = transcriptionEnd)))
+  overlaps = findOverlaps(query = fixedPosRanges, subject = geneRanges, type = "within") %>%
+    as.data.frame()
+  
+  fixedSitesPerGene = fixedSites %>%
+    mutate(range = overlaps$subjectHits[match(bin,overlaps$queryHits)]) %>% #column with corresponding gene from gene set
+    na.omit() %>% #remove variants that don't fall within genes
+    mutate(GeneName = GeneSet$AbbrevName[match(range,GeneSet$bin)]) 
+  
+  #count number of sites that are fixed
+  CountPerGene = fixedSitesPerGene %>%
+    group_by(GeneName) %>%
+    count() %>%
+    ungroup()
+  
+  return(CountPerGene)
+}
+
 #####Functions for plotting summary stat around genes
 
 #Fixed sites for 1Mb around any gene of interest

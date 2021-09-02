@@ -2,11 +2,13 @@
 library(ggrepel)
 library(ggpubr)
 setwd("~/DogProject_Clare/LocalRscripts/OutliersFst")
-source("~/DogProject_Clare/LocalRscripts/OutliersFst/FunctionsForCREBBPComparison.R")
 
 #Load gene files
 genes = read.delim("~/DogProject_Jaz/LocalRscripts/CaseControlROH/EnsemblGenes_CanFam3.1.bed", sep = "\t")
 gene_names = read.table("~/DogProject_Jaz/LocalRscripts/CaseControlROH/EnsemblGenes_CanFam3.1_geneNames.txt")
+
+#Load up functions and parse gene sets 
+source("~/DogProject_Clare/LocalRscripts/OutliersFst/FunctionsForCREBBPComparison.R")
 
 #Generate Dataframes for pi
 dfBC_pi = makeDataFrames("~/DogProject_Clare/LocalRscripts/OutliersFst/BC_allSites.sites.pi") %>%
@@ -66,6 +68,15 @@ mergedDF_Fst = rbind.data.frame(BC_FstPerGene,TM_FstPerGene,AW_FstPerGene) %>%
 #data frame with CREBBP Fst
 CREBBP_Fst = mergedDF_Fst %>%
   filter(GeneName == "CREBBP") 
+
+####Data frames for fixed sites
+#Ethiopian wolf versus arctic
+CountPerGene_EWvAW = compFixedSites("~/DogProject_Clare/LocalRscripts/OutliersFst/FixedSites_EWvsAW_N9.txt") %>%
+  filter(GeneName%in%EW_piPerGene$GeneName) #only compare against gene sets used for computing pi
+
+CountPerGene_EWvTM = compFixedSites("~/DogProject_Clare/LocalRscripts/OutliersFst/FixedSites_EWvsTM_N9.txt") %>%
+  filter(GeneName%in%EW_piPerGene$GeneName) #only compare against gene sets used for computing pi
+
 
 ####Plots for pi
 cbPalette = c("Arctic Wolf" = "gray25", "Ethiopian Wolf" = "#D55E00",  "Isle Royale" = "steelblue", "Border Collie" = "#009E73", "Labrador Retriever" = "gold3", "Pug" = "mediumpurple4", "Tibetan Mastiff" = "#CC79A7")
@@ -138,3 +149,28 @@ ggplot() +
         plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
         axis.title = element_text(size = 16),
         strip.text = element_text(size = 14))
+
+
+####Plots for derived allele counts
+ggplot(CountPerGene_EWvAW, aes(x=n)) + 
+  geom_histogram(bins = 50) + 
+  geom_vline(xintercept = 212, colour="purple") + #Count for CREBBP
+  ggtitle(paste0("p-value = ", round(digits = 3, x = nrow(CountPerGene_EWvAW[CountPerGene_EWvAW$n>212, ])/nrow(CountPerGene_EWvAW)))) +
+  labs(x="Number of Fixed Sites Per Gene (EW vs AW)") + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 16), 
+        axis.text.y = element_text(size = 16), 
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
+        axis.title = element_text(size = 16))
+
+#Ethiopoan wolf versus tibetan mastiff
+ggplot(CountPerGene_EWvTM, aes(x=n)) + 
+  geom_histogram(bins = 50) + 
+  geom_vline(xintercept = 72, colour="purple") + #Count for CREBBP
+  ggtitle(paste0("p-value = ", round(digits = 3, x = nrow(CountPerGene_EWvTM[CountPerGene_EWvTM$n>72, ])/nrow(CountPerGene_EWvTM)))) +
+  labs(x="Number of Fixed Sites Per Gene (EW vs TM)") + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 16), 
+        axis.text.y = element_text(size = 16), 
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
+        axis.title = element_text(size = 16))
