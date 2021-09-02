@@ -57,12 +57,12 @@ FstPerGene = pairwiseFst %>%
             FstNormSNPCount = mean(as.numeric(updatedFst))) %>% 
   mutate(FstNormTranscriptLen = sumFst/(GeneSet$transcript_length[match(range,GeneSet$bin)]),
          GeneName = GeneSet$AbbrevName[match(range,GeneSet$bin)]) %>% #divide by transcript length
-  ungroup() 
-
-FstPerGene$SNPCount = SNPsPerGene$n[match(FstPerGene$range, SNPsPerGene$range)]
+  ungroup() %>%
+  mutate(SNPCount = SNPsPerGene$n[match(range, SNPsPerGene$range)])
 
 #Plot correlation between number of SNPs and Fst
-CREBBP = FstPerGene %>% filter(GeneName =="CREBBP") %>% 
+CREBBP = FstPerGene %>% 
+  filter(GeneName =="CREBBP") %>% 
   select(FstNormSNPCount) %>% 
   as.numeric()#FST for CREBBP
 
@@ -80,7 +80,7 @@ correlationFstSnpCount_CREBBP = ggplot(FstPerGene, aes(x=FstNormSNPCount,y=SNPCo
         legend.title=element_blank(), 
         legend.text=element_text(size=20))
 
-#plot histogram of Fst and label EPAS 1
+#plot histogram of Fst and label CREBBP
 FstHistogram_CREBBP = ggplot() + 
   geom_histogram(data = FstPerGene, aes(x=FstNormSNPCount), bins=50) + 
   geom_vline(xintercept = CREBBP, colour="purple") + 
