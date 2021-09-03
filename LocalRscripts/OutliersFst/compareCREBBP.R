@@ -114,10 +114,16 @@ ggplot() +
         axis.title = element_text(size = 16))
 
 #plot distribution with each species as facet
+CREBBP$pvalues = c(paste0("p = ", round(digits = 3, x = nrow(BC_piPerGene[BC_piPerGene$meanPI<=0.0228, ])/nrow(BC_piPerGene)), sep=""), paste0("p = ", round(digits = 3, x = nrow(TM_piPerGene[TM_piPerGene$meanPI<=0.0417, ])/nrow(TM_piPerGene)), sep=""), paste0("p = ", round(digits = 3, x = nrow(EW_piPerGene[EW_piPerGene$meanPI<=0.00482, ])/nrow(EW_piPerGene)), sep=""), paste0("p = ", round(digits = 3, x = nrow(AW_piPerGene[AW_piPerGene$meanPI<=0.0174, ])/nrow(AW_piPerGene)), sep=""))
+CREBBP$x = c(0.2, 0.2, 0.1, 0.3)
+CREBBP$y = c(290, 290, 890, 290)
+
+#plot distribution with each species as facet
 ggplot() + 
   geom_histogram(data = mergedDF_pi, aes(x=meanPI), bins=100) +
   geom_vline(data = CREBBP, aes(xintercept = meanPI), colour="purple") + 
-  facet_wrap(~fullPopName, scale = "free") +
+  geom_text(data = CREBBP, mapping = aes(x = x, y = y, label = pvalues), size = 6) +
+  facet_wrap(~fullPopName, scales ="free_y") +
   xlab(expression("Mean" ~ pi ~ "per gene")) + 
   theme_bw() + 
   theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 16), 
@@ -156,11 +162,16 @@ PYGB_1Mb_pi = piWindowedAboutGene(dfEW,"chr23", 426984, 2491240, "1Mb", "PYGB")
 CDK8_1Mb_pi = piWindowedAboutGene(dfEW,"chr25", 12058947, 14178073, "1Mb", "CDK8")
 
 #####Plotting for Fst
+CREBBP_Fst$pvalues = c(paste0("p = ", round(digits = 3, x = nrow(BC_FstPerGene[BC_FstPerGene$FstNormSNPCount>=0.8919779, ])/nrow(BC_FstPerGene)), sep=""), paste0("p = ", round(digits = 3, x = nrow(TM_FstPerGene[TM_FstPerGene$FstNormSNPCount>=0.8616547, ])/nrow(TM_FstPerGene)), sep=""), paste0("p = ", round(digits = 3, x = nrow(AW_FstPerGene[AW_FstPerGene$FstNormSNPCount>=0.8865586, ])/nrow(AW_FstPerGene)), sep=""))
+CREBBP_Fst$x = c(0.25, 0.25, 0.2)
+CREBBP_Fst$y = c(240, 240, 240)
+
 #plot distribution with each species as facet
 ggplot() + 
   geom_histogram(data = mergedDF_Fst, aes(x=FstNormSNPCount), bins=100) +
   geom_vline(data = CREBBP_Fst, aes(xintercept = FstNormSNPCount), colour="purple") + 
-  facet_wrap(~fullPopName, scale = "free") +
+  geom_text(data = CREBBP_Fst, mapping = aes(x = x, y = y, label = pvalues), size = 6) +
+  facet_wrap(~fullPopName) +
   xlab(expression(F[ST])) + 
   theme_bw() + 
   theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 16), 
@@ -169,49 +180,17 @@ ggplot() +
         axis.title = element_text(size = 16),
         strip.text = element_text(size = 14))
 
-
 ####Plots for derived allele counts
-#Ethiopoan wolf versus arctic wolf
-ggplot(CountPerGene_EWvAW, aes(x=n)) + 
-  geom_histogram(bins = 50) + 
-  geom_vline(xintercept = 212, colour="purple") + #Count for CREBBP
-  ggtitle(paste0("p-value = ", round(digits = 3, x = nrow(CountPerGene_EWvAW[CountPerGene_EWvAW$n>=212, ])/nrow(CountPerGene_EWvAW)))) +
-  labs(x="Number of fixed sites per gene (EW vs AW)") + 
-  theme_bw() + 
-  theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 16), 
-        axis.text.y = element_text(size = 16), 
-        plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
-        axis.title = element_text(size = 16))
-
-#Ethiopoan wolf versus tibetan mastiff
-ggplot(CountPerGene_EWvBC, aes(x=n)) + 
-  geom_histogram(bins = 50) + 
-  geom_vline(xintercept = 214, colour="purple") + #Count for CREBBP
-  ggtitle(paste0("p-value = ", round(digits = 3, x = nrow(CountPerGene_EWvTM[CountPerGene_EWvTM$n>=214, ])/nrow(CountPerGene_EWvTM)))) +
-  labs(x="Number of fixed sites per gene (EW vs TM)") + 
-  theme_bw() + 
-  theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 16), 
-        axis.text.y = element_text(size = 16), 
-        plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
-        axis.title = element_text(size = 16))
-
-#Ethiopian wolf versus tibetan mastiff
-ggplot(CountPerGene_EWvTM, aes(x=n)) + 
-  geom_histogram(bins = 50) + 
-  geom_vline(xintercept = 121, colour="purple") + #Count for CREBBP
-  ggtitle(paste0("p-value = ", round(digits = 3, x = nrow(CountPerGene_EWvTM[CountPerGene_EWvTM$n>=121, ])/nrow(CountPerGene_EWvTM)))) +
-  labs(x="Number of fixed sites per gene (EW vs TM)") + 
-  theme_bw() + 
-  theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 16), 
-        axis.text.y = element_text(size = 16), 
-        plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
-        axis.title = element_text(size = 16))
+CREBBP_FixedSites$pvalues = c(paste0("p = ", round(digits = 3, x = nrow(CountPerGene_EWvAW[CountPerGene_EWvAW$n>=212, ])/nrow(CountPerGene_EWvAW)), sep=""), paste0("p = ", round(digits = 3, x = nrow(CountPerGene_EWvTM[CountPerGene_EWvTM$n>=121, ])/nrow(CountPerGene_EWvTM)), sep=""), paste0("p = ", round(digits = 3, x = nrow(CountPerGene_EWvBC[CountPerGene_EWvBC$n>=214, ])/nrow(CountPerGene_EWvBC)), sep=""))
+CREBBP_FixedSites$x = c(600, 600, 600)
+CREBBP_FixedSites$y = c(1900, 1900, 1900)
 
 #plot with populations as facets
 ggplot() + 
   geom_histogram(data = mergedDF_FixedSites, aes(x=n), bins=100) +
   geom_vline(data = CREBBP_FixedSites, aes(xintercept = n), colour="purple") + 
-  facet_wrap(~fullPopName, scale = "free") +
+  facet_wrap(~fullPopName) +
+  geom_text(data = CREBBP_FixedSites, mapping = aes(x = x, y = y, label = pvalues), size = 6) +
   xlab("Number of fixed sites per gene") + 
   theme_bw() + 
   theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 16), 
