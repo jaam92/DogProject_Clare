@@ -11,7 +11,10 @@ FamFile = read.table("~/Documents/DogProject_Clare/LocalRscripts/ADMIXTURE/prune
 Individuals = read.table("~/Documents/DogProject_Clare/LocalRscripts/Dogs2Keep.txt")
 
 #Plot the Error
-ggplot(CVError, aes(x=K_subpops,y=CV_error)) + geom_line() + geom_point() + theme_bw() #low point is K = 6
+ggplot(CVError, aes(x=K_subpops,y=CV_error)) + 
+  geom_line() + 
+  geom_point() + 
+  theme_bw() #low point is K = 6
 
 #Make data frame of admixture for K=6
 orderPops = c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "Arctic Wolf", "Ethiopian Wolf", "Isle Royale")
