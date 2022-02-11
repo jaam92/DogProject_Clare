@@ -45,11 +45,14 @@ ProcessDF = function(inputDF){ inputDF %>%
 
 #Preprocess and create raw data frame and
 #Make new data frames based on coverage cutoffs``
-plotEW = ProcessDF(Annotated) %>% filter(TwentyPerCov == 1) #Coverage used to select prior was 20% callable sites
+plotEW = ProcessDF(Annotated) %>% 
+  filter(TwentyPerCov == 1) #Coverage used to select prior was 20% callable sites
 
 #Plot
 #Generate x axis with one of the data frames 
-axisdf = plotEW %>% group_by(chromo) %>% summarize(center=( max(newWinStart) + min(newWinStart) ) / 2 )
+axisdf = plotEW %>% 
+  group_by(chromo) %>% 
+  summarize(center=( max(newWinStart) + min(newWinStart) ) / 2 )
 
 plotFunction = function(dataFrame, indiv) {
   indivHet = ggplot() + 
@@ -68,9 +71,27 @@ plotFunction = function(dataFrame, indiv) {
 (neutralhets_EW4 = plotFunction(plotEW, plotEW$hets_EW4))
 
 #Plot distribution of number of hets 
-(DensityPlotHets = ggplot() + geom_density(data=plotEW, aes(x=hets_EW4), fill="blue") + theme_bw() + xlab("Number of hets per 1Kb") + theme_bw()+ theme(axis.text.x = element_text(size  = 20), axis.text.y = element_text(size = 20), axis.title=element_text(size=20), plot.title = element_text(size=20, hjust = 0.5),legend.title=element_blank(), legend.text=element_text(size=18),legend.position="bottom"))
+(DensityPlotHets = ggplot() + 
+    geom_density(data=plotEW, aes(x=hets_EW4), fill="blue") + 
+    theme_bw() + 
+    xlab("Number of hets per 1Kb") + 
+    theme(axis.text.x = element_text(size  = 20), 
+          axis.text.y = element_text(size = 20), 
+          axis.title=element_text(size=20), 
+          plot.title = element_text(size=20, hjust = 0.5),
+          legend.title=element_blank(), 
+          legend.text=element_text(size=18),legend.position="bottom"))
 
-(DensityPlotHetsZoom = ggplot() + geom_density(data=plotEW, aes(x=hets_EW4), fill="blue") + theme_bw() + xlab("Number of hets per 1Kb") + xlim(0,4) + theme_bw()+ theme(axis.text.x = element_text(size  = 20), axis.text.y = element_text(size = 20), axis.title=element_text(size=20), plot.title = element_text(size=20, hjust = 0.5),legend.title=element_blank(), legend.text=element_text(size=18),legend.position="bottom"))
+(DensityPlotHetsZoom = ggplot() + 
+    geom_density(data=plotEW, aes(x=hets_EW4), fill="blue") +
+    theme_bw() + 
+    xlab("Number of hets per 1Kb") + 
+    theme(axis.text.x = element_text(size  = 20), 
+          axis.text.y = element_text(size = 20), 
+          axis.title=element_text(size=20), 
+          plot.title = element_text(size=20, hjust = 0.5),
+          legend.title=element_blank(), 
+          legend.text=element_text(size=18),legend.position="bottom"))
 
 #Plot proportion with histogram
 totalHets = dim(plotEW)[1]
@@ -80,7 +101,16 @@ histogramHets = plotEW %>%
   mutate(propBin = n/totalHets) %>%
   ungroup()
 
-(HistogramPlotHets = ggplot() + geom_bar(data=histogramHets, aes(x=hets_EW4, y=propBin), stat = "identity") + theme_bw() + labs(x="Count of Heterozygotes per 1Kb", y="Proportion of Total Hets") + theme_bw()+ theme(axis.text.x = element_text(size  = 20), axis.text.y = element_text(size = 20), axis.title=element_text(size=20), plot.title = element_text(size=20, hjust = 0.5),legend.title=element_blank(), legend.text=element_text(size=18),legend.position="bottom"))
+(HistogramPlotHets = ggplot() + 
+    geom_bar(data=histogramHets, aes(x=hets_EW4, y=propBin), stat = "identity") +
+    theme_bw() + 
+    labs(x="Count of Heterozygotes per 1Kb", y="Proportion of Total Hets") + 
+    theme(axis.text.x = element_text(size  = 20), 
+          axis.text.y = element_text(size = 20), 
+          axis.title=element_text(size=20), 
+          plot.title = element_text(size=20, hjust = 0.5),
+          legend.title=element_blank(), 
+          legend.text=element_text(size=18),legend.position="bottom"))
 
 Heterozygosity = sum(plotEW$hets_EW4)/sum(plotEW$sites_total)
 Heterozygosity
