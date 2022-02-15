@@ -129,7 +129,7 @@ compFixedSites = function(inFile){
   #count number of sites that are fixed
   CountPerGene = fixedSitesPerGene %>%
     group_by(GeneName) %>%
-    count() %>%
+    count(name = "FixedSites") %>%
     ungroup()
   
   return(CountPerGene)
