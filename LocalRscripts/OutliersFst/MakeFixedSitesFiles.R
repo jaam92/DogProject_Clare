@@ -3,7 +3,7 @@ library(data.table)
 library(tidyverse)
 
 #Load files
-setwd("~/Documents/DogProject_Clare/LocalRscripts/Fst")
+setwd("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/")
 
 indivsEW = read.table(file = "~/Documents/DogProject_Clare/LocalRscripts/IndivFiles/EW_indivList_downsample_N9.txt")
 indivsTM = read.table(file = "~/Documents/DogProject_Clare/LocalRscripts/IndivFiles/TM_indivList_downsample_N9.txt")

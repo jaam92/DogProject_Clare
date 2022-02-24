@@ -3,7 +3,7 @@ library(tidyverse)
 library(data.table)
 library(hdrcde)
 library(ggpubr)
-
+options(scipen = 999)
 #Plot the priors
 set.seed(2)
 samps = seq(1:100000)
@@ -119,7 +119,6 @@ plotPosteriorTogether = ggarrange(plotPosteriorNe1  + ylab(""),
                                   plotPosteriorNe3  + ylab(""),
                                   nrow = 5, 
                                   ncol = 1,
-                                  labels = c("C","D","E","F","G"),
                                   align = 'v')
 
 #Parse simulated data
@@ -171,10 +170,11 @@ colnames(subsetReal) <- matchCols
 colnames(subsetSim) <- matchCols
 comboDF = rbind.data.frame(subsetReal,subsetSim)
 
-CompDataS = ggplot(data=comboDF %>% filter(bin <= 13), aes(x=bin, y=propSites,fill=Data)) + 
+CompDataS = ggplot(data=comboDF %>% filter(bin <= 13), 
+                   aes(x=bin, y=propSites,fill=Data)) + 
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() + 
-  labs(x="Count of S", y="Proportion of Total S") +
+  labs(x=expression(italic(S)), y="Proportion of data") +
   theme(axis.text.x = element_text(size  = 20), 
         axis.text.y = element_text(size = 20), 
         axis.title = element_text(size = 24), 
@@ -182,12 +182,13 @@ CompDataS = ggplot(data=comboDF %>% filter(bin <= 13), aes(x=bin, y=propSites,fi
         legend.title=element_blank(), 
         legend.text=element_text(size=20)) +
   scale_fill_manual(values = c("Empirical"="blue","Simulated"="red")) +
-  scale_x_continuous(limits=c(-1, 12), breaks=c(0, 2, 4, 6, 8, 10, 12))
+  scale_x_continuous(limits=c(-1, 13), breaks=seq(from=0,to=12))
 
-CompDataS_zoom = ggplot(data=comboDF %>% filter(bin > 0 & bin < 13), aes(x=bin, y=propSites,fill=Data)) +
+CompDataS_zoom = ggplot(data=comboDF %>% filter(bin > 0 & bin < 13), 
+                        aes(x=bin, y=propSites,fill=Data)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() +
-  labs(x="Count of S", y="Proportion of Total S") +
+  labs(x=expression(italic(S)), y="Proportion of data") +
   theme(axis.text.x = element_text(size  = 20), 
         axis.text.y = element_text(size = 20), 
         axis.title = element_text(size = 24), 
@@ -196,7 +197,7 @@ CompDataS_zoom = ggplot(data=comboDF %>% filter(bin > 0 & bin < 13), aes(x=bin, 
         legend.text=element_text(size=20)) + 
   scale_fill_manual(values = c("Empirical"="blue","Simulated"="red")) +
   ylim(0,0.025) + 
-  scale_x_continuous(limits=c(0.5, 12), breaks=c(2, 4, 6, 8, 10))
+  scale_x_continuous(limits=c(0.5, 13), breaks=seq(1:12)) 
 
 #Combine data for Pi
 subsetReal_pi = PiRealData %>% select("bin","propSites", "Data")
@@ -222,7 +223,7 @@ comboDF_pi$intervals = factor(comboDF_pi$intervals, levels = rangesDF$ranges) #o
 CompDataPi = ggplot(data=comboDF_pi %>% filter(bin <= 12), aes(x=intervals, y=propSites,fill=Data)) + 
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() + 
-  labs(x=expression(Interval~pi), y=expression(Proportion~pi)) +
+  labs(x=expression(pi), y="Proportion of data") +
   theme(axis.text.x = element_text(size = 20, angle = 90, hjust = 0.5), 
         axis.text.y = element_text(size = 20), 
         axis.title = element_text(size = 24), 
@@ -234,7 +235,7 @@ CompDataPi = ggplot(data=comboDF_pi %>% filter(bin <= 12), aes(x=intervals, y=pr
 CompDataPi_zoom = ggplot(data=comboDF_pi %>% filter(bin > 0 & bin <= 12), aes(x=intervals, y=propSites,fill=Data)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() + 
-  labs(x=expression(Interval~pi), y=expression(Proportion~pi)) +
+  labs(x=expression(pi), y="Proportion of data") +
   theme(axis.text.x = element_text(size  = 20, angle = 90, hjust = 0.5), 
         axis.text.y = element_text(size = 20), 
         axis.title = element_text(size=24), 

@@ -2,13 +2,11 @@
 library(ggrepel)
 library(ggpubr)
 setwd("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst")
+source("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FunctionsForCREBBPComparison.R") #Load up functions and parse gene sets 
 
 #Load gene files
 genes = read.delim("~/Documents/DogProject_Jaz/LocalRscripts/CaseControlROH/EnsemblGenes_CanFam3.1.bed", sep = "\t")
 gene_names = read.table("~/Documents/DogProject_Jaz/LocalRscripts/CaseControlROH/EnsemblGenes_CanFam3.1_geneNames.txt")
-
-#Load up functions and parse gene sets 
-source("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FunctionsForCREBBPComparison.R")
 
 #Generate Dataframes for pi
 dfBC_pi = makeDataFrames("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/BC_allSites.sites.pi") %>%
@@ -34,10 +32,10 @@ AW_CREBBP = computePI_CREBBP(dfAW_pi, "AW")
 
 mergedDF_pi = rbind.data.frame(BC_piPerGene,TM_piPerGene,EW_piPerGene, AW_piPerGene) %>%
   mutate(chrom = gsub("chr", "", GeneSet$chrom[match(GeneName, GeneSet$AbbrevName)]),
-         fullPopName = case_when(Population == "AW" ~ "Arctic Wolf",
+         fullPopName = case_when(Population == "AW" ~ "Arctic wolf",
                                  Population == "BC" ~ "Border Collie",
                                  Population == "TM" ~ "Tibetan Mastiff",
-                                 Population == "EW" ~ "Ethiopian Wolf")) 
+                                 Population == "EW" ~ "Ethiopian wolf")) 
 
 #data frame with CREBBP
 CREBBP = mergedDF_pi %>%
@@ -45,10 +43,10 @@ CREBBP = mergedDF_pi %>%
 
 allSitesDF_pi = rbind.data.frame(dfBC_pi, dfTM_pi, dfEW_pi, dfAW_pi) %>%
   filter(GeneName == "CREBBP") %>%
-  mutate(fullPopName = case_when(Population == "AW" ~ "Arctic Wolf",
+  mutate(fullPopName = case_when(Population == "AW" ~ "Arctic wolf",
                                  Population == "BC" ~ "Border Collie",
                                  Population == "TM" ~ "Tibetan Mastiff",
-                                 Population == "EW" ~ "Ethiopian Wolf"))
+                                 Population == "EW" ~ "Ethiopian wolf"))
 
 
 ####Generate dataframes and compute Fst across all genes
@@ -92,12 +90,14 @@ mergedDF_FixedSites = rbind.data.frame(CountPerGene_EWvAW, CountPerGene_EWvTM, C
                         Population == "TM" ~ "Ethiopian wolf versus Tibetan Mastiff")) %>%
   na.omit() 
 
+fixedEW = read_delim("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FixedDerivedSites_EW_N9.txt", delim = "\t")
+
 #data frame with CREBBP fixed sites
 CREBBP_FixedSites = mergedDF_FixedSites %>%
   filter(GeneName == "CREBBP")
 
 ####Start plotting
-cbPalette = c("Arctic Wolf" = "gray25", "Ethiopian Wolf" = "#D55E00",  "Isle Royale" = "steelblue", "Border Collie" = "#009E73", "Labrador Retriever" = "gold3", "Pug" = "mediumpurple4", "Tibetan Mastiff" = "#CC79A7")
+cbPalette = c("Arctic wolf" = "gray25", "Ethiopian wolf" = "#D55E00",  "Isle Royale" = "steelblue", "Border Collie" = "#009E73", "Labrador Retriever" = "gold3", "Pug" = "mediumpurple4", "Tibetan Mastiff" = "#CC79A7")
 
 ####Plots for pi
 dodge = position_dodge(width = 0.9)
@@ -164,11 +164,11 @@ ggplot(CREBBP, aes(x=fullPopName,y=meanPI,colour=fullPopName)) +
         axis.title = element_text(size = 16))
 
 #plots for windowed pi
-CREBBP_1Mb_pi = piWindowedAboutGene(dfEW,"chr6", 36412372, 38531822, "1Mb", "CREBBP")
-GRB2_1Mb_pi = piWindowedAboutGene(dfEW,"chr9", 4109244, 6181472, "1Mb", "GRB2")
-MKL1_1Mb_pi = piWindowedAboutGene(dfEW,"chr10", 23599593, 25752076, "1Mb", "MKL1")
-PYGB_1Mb_pi = piWindowedAboutGene(dfEW,"chr23", 426984, 2491240, "1Mb", "PYGB")
-CDK8_1Mb_pi = piWindowedAboutGene(dfEW,"chr25", 12058947, 14178073, "1Mb", "CDK8")
+CREBBP_1Mb_pi = piWindowedAboutGene(dfEW_pi,"chr6", 36412372, 38531822, "1Mb", "CREBBP")
+GRB2_1Mb_pi = piWindowedAboutGene(dfEW_pi,"chr9", 4109244, 6181472, "1Mb", "GRB2")
+MKL1_1Mb_pi = piWindowedAboutGene(dfEW_pi,"chr10", 23599593, 25752076, "1Mb", "MKL1")
+PYGB_1Mb_pi = piWindowedAboutGene(dfEW_pi,"chr23", 426984, 2491240, "1Mb", "PYGB")
+CDK8_1Mb_pi = piWindowedAboutGene(dfEW_pi,"chr25", 12058947, 14178073, "1Mb", "CDK8")
 
 #####Plotting for Fst
 CREBBP_Fst$pvalues = c(paste0("p = ", round(digits = 3, x = nrow(BC_FstPerGene[BC_FstPerGene$FstNormSNPCount>=0.8919779, ])/nrow(BC_FstPerGene)), sep=""), 
@@ -218,3 +218,10 @@ ggplot(mergedDF_FixedSites, aes(FixedSites, group=fullPopName)) +
         plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
         axis.title = element_text(size = 20),
         strip.text = element_text(size = 20))
+
+
+
+top5 = read_delim("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/Top5perGenes_EWvsAll3.txt", col_names = c("GeneName"), delim = "\t") %>%
+  group_by(GeneName) %>%
+  count(name = "Occurences") %>%
+  arrange(desc(Occurences))

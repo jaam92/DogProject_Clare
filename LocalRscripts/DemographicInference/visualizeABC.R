@@ -27,11 +27,11 @@ Top200 = results %>%
 results$Status = ifelse(results$jointScore %in% Top200$jointScore, "Accepted", "Rejected")
 
 #Plot it to make sure we did in fact select the lowest scores
-#ggplot(results %>% filter(SegSiteScore < 300), 
-#       aes(x=SegSiteScore,y=PiScore, colour = Status)) + 
-#  geom_point() +
-#  scale_colour_manual(values=c(Accepted = "blue", Rejected = "gray60")) + 
-#  theme_bw()
+# ggplot(results %>% filter(SegSiteScore < 300), 
+#        aes(x=SegSiteScore, y=PiScore, colour = Status)) + 
+#   geom_point() +
+#   scale_colour_manual(values=c(Accepted = "blue", Rejected = "gray60")) + 
+#   theme_bw()
 
 #See if scores are correlated
 fitScores = lm(data = results %>% filter(Status == "Accepted"), formula = SegSiteScore ~ PiScore)
@@ -59,7 +59,7 @@ replaceColnames$binName = paste0("bin",0:(nrow(replaceColnames)-1)) #add new col
 S = splitResults$SegSitesPerBin %>%
   filter(SegSiteScore < 300) %>% #zoom in on xaxis
   select(starts_with("V"), "Status") %>%
-  melt(id="Status") %>%
+  pivot_longer(!Status, names_to = "variable") %>% 
   mutate(binNum = replaceColnames$binNum[match(variable,replaceColnames$OG)],
          variable = replaceColnames$binName[match(variable,replaceColnames$OG)]) 
 
@@ -69,13 +69,14 @@ densityS = ggplot(S %>% filter(binNum <= 5),
   facet_wrap(~variable, scales = "free") +
   scale_fill_manual(values=c(Accepted="blue", Rejected="gray60")) +
   theme_bw() +
-  ggtitle(expression(Theta[W])) +
+  ggtitle(expression(~italic(S))) +
+  #ggtitle(expression(Theta[W])) +
   theme(plot.title = element_text(size=24, hjust = 0.5, face = "bold"))
 
 P = splitResults$piPerBin %>%
   filter(SegSiteScore < 300) %>% #zoom in on xaxis
   select(starts_with("V"), "Status") %>%
-  melt(id="Status") %>%
+  pivot_longer(!Status, names_to = "variable") %>% 
   mutate(binNum = replaceColnames$binNum[match(variable,replaceColnames$OG)],
          variable = replaceColnames$binName[match(variable,replaceColnames$OG)]) 
 
@@ -88,7 +89,12 @@ densityP = ggplot(P %>% filter(binNum <= 5),
   ggtitle(expression(pi)) +
   theme(plot.title = element_text(size=24, hjust = 0.5, face = "bold"))
 
-#ggarrange(densityS + labs(x="Count per Bin", y=""), densityP + labs(x="Count per Bin", y=""), ncol = 2, nrow = 1, common.legend = T, legend = "bottom")
+ggarrange(densityS + labs(x="Count per Bin", y=""), 
+          densityP + labs(x="Count per Bin", y=""), 
+          ncol = 2, 
+          nrow = 1, 
+          common.legend = T, 
+          legend = "bottom")
 
 #Compare to real data
 realData = read.delim("~/Documents/DogProject_Clare/LocalRscripts/DemographicInference/InputData/EWSamps_allChroms_NeutralRegions_het_1000win_1000step_ABCinputFile.txt") %>% 
@@ -144,16 +150,19 @@ ggplot() +
   geom_point(data = simulationsPlot %>% filter(binNum < 6),  aes(x=valueS, y=valuePi, colour=Status, shape = Data)) + 
   geom_point(data = empiricalPlottingDF %>% filter(binNum < 6),  aes(x=valueS, y=valuePi, shape = Data), colour="red") +
   #facet_wrap(~variable) +
-  facet_wrap(~wrapLabels, scales = "free", labeller = label_bquote(Theta[W]==.(gsub(":.*", "",wrapLabels))~"&"~ pi==.(gsub(".*:", "",wrapLabels)))) +
+  #facet_wrap(~wrapLabels, scales = "free", labeller = label_bquote(Theta[W]==.(gsub(":.*", "",wrapLabels))~"&"~ pi==.(gsub(".*:", "",wrapLabels)))) +
+  facet_wrap(~wrapLabels, scales = "free", labeller = label_bquote(italic(S)==.(gsub(":.*", "",wrapLabels))~"&"~ pi==.(gsub(".*:", "",wrapLabels)))) +
   scale_colour_manual(values=c(Accepted="blue", Rejected="gray60")) +
   scale_shape_manual(name = "Data", values = c(Empirical=8, Simulated = 16)) + 
   guides(color = guide_legend(order = 0),
-    shape = guide_legend(order = 1)) +
+         shape = guide_legend(order = 1)) +
 theme_bw() +
-  labs(x=expression("Count per bin" ~ Theta[W]), y=expression("Count per bin" ~ pi)) +
+  #labs(x=expression("Count per bin" ~ Theta[W]), y=expression("Count per bin" ~ pi)) +
+  labs(x=expression("Count per bin" ~ italic(S)), y=expression("Count per bin" ~ pi)) +
   theme(axis.text.x = element_text(size  = 20), 
         axis.text.y = element_text(size = 20), 
         axis.title = element_text(size=24, face = "bold"), 
         plot.title = element_text(size=24, hjust = 0.5),
+        strip.text = element_text(size=20),
         legend.title=element_blank(), 
         legend.text=element_text(size=20))

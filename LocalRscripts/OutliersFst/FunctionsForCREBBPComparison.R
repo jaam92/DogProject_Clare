@@ -138,14 +138,23 @@ compFixedSites = function(inFile){
 #####Functions for plotting summary stat around genes
 
 #Fixed sites for 1Mb around any gene of interest
-countFixDerHomGene <- function(chromNum, winStart, winEnd, windowLength, geneName){
-  #Look at genes within 1 Mb around gene of interest
-  fixedDerHomSitesPerGeneEW = fixedSites %>%
+countFixDerHomGene <- function(dataFrame, chromNum, winStart, winEnd, windowLength, geneName){
+  
+  #read file in 
+  fixedSites = dataFrame %>%
     filter(EW == "18" & CHROM == chromNum) %>%
+    mutate(bin = row_number())
+  
+  #overlap genes
+  fixedPosRanges = with(fixedSites, GRanges(CHROM, IRanges(start=POS, end = POS)))
+  geneRanges = with(GeneSet, GRanges(chrom, IRanges(start=transcriptionStart, end = transcriptionEnd)))
+  overlaps = findOverlaps(query = fixedPosRanges, subject = geneRanges, type = "within") %>%
+    as.data.frame()
+  
+  fixedDerHomSitesPerGeneEW = fixedSites %>%
     mutate(range = overlaps$subjectHits[match(bin,overlaps$queryHits)]) %>% #column with corresponding gene from gene set
     na.omit() %>% #remove variants that don't fall within genes
-    mutate(GeneName = GeneSet$AbbrevName[match(range,GeneSet$bin)]) %>%
-    filter(GeneName%in%EW_piPerGene$GeneName)
+    mutate(GeneName = GeneSet$AbbrevName[match(range,GeneSet$bin)]) 
   
   CountPerGene = fixedDerHomSitesPerGeneEW %>%
     filter(POS >= winStart &  POS <= winEnd) %>%
@@ -157,12 +166,12 @@ countFixDerHomGene <- function(chromNum, winStart, winEnd, windowLength, geneNam
   plotGene = ggplot(CountPerGene, aes(x=GeneName, y=n, colour=Label)) + 
     geom_point() +
     scale_colour_manual(values=c("blue","red"), guide = FALSE) + 
-    geom_text_repel(size = 6, aes(label=ifelse((GeneName == geneName) ,as.character(GeneName),'')), show.legend = F) + 
+    geom_text_repel(size = 10, aes(label=ifelse((GeneName == geneName) ,as.character(GeneName),'')), show.legend = F) + 
     theme_bw() + 
-    ggtitle(paste("Genes within", windowLength, "of", geneName, sep = " ")) +
-    labs(x = "Gene Name", 
-         y="Number of Derived Homozygous Fixed Sites Per Gene (EW)") +
-    theme(axis.text.x = element_text(size  = 14), 
+    #ggtitle(paste("Genes within", windowLength, "of", geneName, sep = " ")) +
+    labs(x = "Gene name", 
+         y="Number of Derived homozygous fixed sites per-gene") +
+    theme(axis.text.x = element_text(size  = 20, hjust = 0.5, angle = 90, vjust = 0.8), 
           axis.text.y = element_text(size = 20), 
           axis.title = element_text(size=24, face = "bold"), 
           plot.title = element_text(size=24, hjust = 0.5), 
@@ -182,12 +191,12 @@ piWindowedAboutGene = function(dataFrame, chromNum, winStart, winEnd, windowLeng
   plotGenePi = ggplot(piPerGene, aes(x=GeneName, y=meanPI, colour=Label)) + 
     geom_point() +
     scale_colour_manual(values=c("blue","red"), guide = FALSE) + 
-    geom_text_repel(size = 6, aes(label=ifelse((GeneName == geneName) ,as.character(GeneName),'')), show.legend = F) + 
+    geom_text_repel(size = 10, aes(label=ifelse((GeneName == geneName) ,as.character(GeneName),'')), show.legend = F) + 
     theme_bw() + 
-    ggtitle(paste("Genes within", windowLength, "of", geneName, sep = " ")) +
+    #ggtitle(paste("Genes within", windowLength, "of", geneName, sep = " ")) +
     labs(x = "Gene Name", 
          y=expression("Mean" ~ pi ~ "per gene")) +
-    theme(axis.text.x = element_text(size  = 14), 
+    theme(axis.text.x = element_text(size  = 20, hjust = 0.5, angle = 90, vjust = 0.8), 
           axis.text.y = element_text(size = 20), 
           axis.title = element_text(size=24, face = "bold"), 
           plot.title = element_text(size=24, hjust = 0.5), 
