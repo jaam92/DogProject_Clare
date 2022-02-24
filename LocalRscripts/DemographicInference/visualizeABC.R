@@ -63,10 +63,10 @@ S = splitResults$SegSitesPerBin %>%
   mutate(binNum = replaceColnames$binNum[match(variable,replaceColnames$OG)],
          variable = replaceColnames$binName[match(variable,replaceColnames$OG)]) 
 
-densityS = ggplot(S %>% filter(binNum <= 5),
+densityS = ggplot(S %>% filter(binNum <= 13),
                   aes(value, fill=Status)) + 
   geom_density() + 
-  facet_wrap(~variable, scales = "free") +
+  facet_wrap(~variable) +
   scale_fill_manual(values=c(Accepted="blue", Rejected="gray60")) +
   theme_bw() +
   ggtitle(expression(~italic(S))) +
@@ -80,10 +80,10 @@ P = splitResults$piPerBin %>%
   mutate(binNum = replaceColnames$binNum[match(variable,replaceColnames$OG)],
          variable = replaceColnames$binName[match(variable,replaceColnames$OG)]) 
 
-densityP = ggplot(P %>% filter(binNum <= 5),
+densityP = ggplot(P %>% filter(binNum <= 13),
        aes(value, fill=Status)) + 
   geom_density() + 
-  facet_wrap(~variable, scales = "free") +
+  facet_wrap(~variable) +
   scale_fill_manual(values=c(Accepted="blue", Rejected="gray60")) +
   theme_bw() +
   ggtitle(expression(pi)) +
@@ -147,8 +147,8 @@ simulationsPlot$wrapLabels = glue('{simulationsPlot$binNum}:{simulationsPlot$piR
 
 #Use gsub to parse the labels
 ggplot() + 
-  geom_point(data = simulationsPlot %>% filter(binNum < 6),  aes(x=valueS, y=valuePi, colour=Status, shape = Data)) + 
-  geom_point(data = empiricalPlottingDF %>% filter(binNum < 6),  aes(x=valueS, y=valuePi, shape = Data), colour="red") +
+  geom_point(data = simulationsPlot %>% filter(binNum < 13),  aes(x=valueS, y=valuePi, colour=Status, shape = Data)) + 
+  geom_point(data = empiricalPlottingDF %>% filter(binNum < 13),  aes(x=valueS, y=valuePi, shape = Data), colour="red") +
   #facet_wrap(~variable) +
   #facet_wrap(~wrapLabels, scales = "free", labeller = label_bquote(Theta[W]==.(gsub(":.*", "",wrapLabels))~"&"~ pi==.(gsub(".*:", "",wrapLabels)))) +
   facet_wrap(~wrapLabels, scales = "free", labeller = label_bquote(italic(S)==.(gsub(":.*", "",wrapLabels))~"&"~ pi==.(gsub(".*:", "",wrapLabels)))) +
