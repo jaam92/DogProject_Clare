@@ -4,6 +4,7 @@ library(data.table)
 library(hdrcde)
 library(ggpubr)
 options(scipen = 999)
+
 #Plot the priors
 set.seed(2)
 samps = seq(1:100000)
@@ -170,7 +171,7 @@ colnames(subsetReal) <- matchCols
 colnames(subsetSim) <- matchCols
 comboDF = rbind.data.frame(subsetReal,subsetSim)
 
-CompDataS = ggplot(data=comboDF %>% filter(bin <= 13), 
+CompDataS = ggplot(data=comboDF %>% filter(bin <= 14), 
                    aes(x=bin, y=propSites,fill=Data)) + 
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() + 
@@ -182,9 +183,9 @@ CompDataS = ggplot(data=comboDF %>% filter(bin <= 13),
         legend.title=element_blank(), 
         legend.text=element_text(size=20)) +
   scale_fill_manual(values = c("Empirical"="blue","Simulated"="red")) +
-  scale_x_continuous(limits=c(-1, 13), breaks=seq(from=0,to=12))
+  scale_x_continuous(limits=c(-1, 14.5), breaks=seq(from=0,to=14))
 
-CompDataS_zoom = ggplot(data=comboDF %>% filter(bin > 0 & bin < 13), 
+CompDataS_zoom = ggplot(data=comboDF %>% filter(bin > 0 & bin <= 14), 
                         aes(x=bin, y=propSites,fill=Data)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() +
@@ -197,7 +198,7 @@ CompDataS_zoom = ggplot(data=comboDF %>% filter(bin > 0 & bin < 13),
         legend.text=element_text(size=20)) + 
   scale_fill_manual(values = c("Empirical"="blue","Simulated"="red")) +
   ylim(0,0.025) + 
-  scale_x_continuous(limits=c(0.5, 13), breaks=seq(1:12)) 
+  scale_x_continuous(limits=c(0.5, 14.5), breaks=seq(1:14)) 
 
 #Combine data for Pi
 subsetReal_pi = PiRealData %>% select("bin","propSites", "Data")
@@ -220,7 +221,7 @@ comboDF_pi$intervals = rangesDF$ranges[match(comboDF_pi$bin,rangesDF$bin)]
 comboDF_pi$intervals = factor(comboDF_pi$intervals, levels = rangesDF$ranges) #order the intervals
 
 ###Plot Pi
-CompDataPi = ggplot(data=comboDF_pi %>% filter(bin <= 12), aes(x=intervals, y=propSites,fill=Data)) + 
+CompDataPi = ggplot(data=comboDF_pi %>% filter(bin <= 14), aes(x=intervals, y=propSites,fill=Data)) + 
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() + 
   labs(x=expression(pi), y="Proportion of data") +
@@ -232,7 +233,7 @@ CompDataPi = ggplot(data=comboDF_pi %>% filter(bin <= 12), aes(x=intervals, y=pr
         legend.text=element_text(size=20)) + 
   scale_fill_manual(values = c("Empirical"="blue","Simulated"="red"))
 
-CompDataPi_zoom = ggplot(data=comboDF_pi %>% filter(bin > 0 & bin <= 12), aes(x=intervals, y=propSites,fill=Data)) +
+CompDataPi_zoom = ggplot(data=comboDF_pi %>% filter(bin > 0 & bin <= 14), aes(x=intervals, y=propSites,fill=Data)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
   theme_bw() + 
   labs(x=expression(pi), y="Proportion of data") +
@@ -292,7 +293,7 @@ VisualizeABC = ggplot() +
                  colour = Status,
                  alpha = Status)) +
   scale_colour_manual(values=c(Accepted="blue", Rejected="gray60")) +
-  scale_alpha_manual(values=c(Rejected = 0.2, Accepted = 1),guide=F) +
+  scale_alpha_manual(values=c(Rejected = 0.2, Accepted = 1),guide="none") +
   geom_point(data = test %>% filter(Status == "Accepted" & totalS <= 2500), 
              aes(x=totalS,
                  y=totalPi, 

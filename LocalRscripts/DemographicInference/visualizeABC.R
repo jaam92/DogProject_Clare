@@ -55,18 +55,20 @@ replaceColnames = results %>%
 names(replaceColnames)[1] = "OG"
 replaceColnames$binNum = 0:(nrow(replaceColnames)-1) #add bin number
 replaceColnames$binName = paste0("bin",0:(nrow(replaceColnames)-1)) #add new column name
+orderBins = paste0("bin",0:(nrow(replaceColnames)-1)) #order for plotting
 
 S = splitResults$SegSitesPerBin %>%
   filter(SegSiteScore < 300) %>% #zoom in on xaxis
   select(starts_with("V"), "Status") %>%
   pivot_longer(!Status, names_to = "variable") %>% 
   mutate(binNum = replaceColnames$binNum[match(variable,replaceColnames$OG)],
-         variable = replaceColnames$binName[match(variable,replaceColnames$OG)]) 
+         variable = replaceColnames$binName[match(variable,replaceColnames$OG)],
+         variable = factor(variable, levels = orderBins)) 
 
-densityS = ggplot(S %>% filter(binNum <= 13),
+densityS = ggplot(S %>% filter(binNum <= 14),
                   aes(value, fill=Status)) + 
   geom_density() + 
-  facet_wrap(~variable) +
+  facet_wrap(~variable, scales = "free") +
   scale_fill_manual(values=c(Accepted="blue", Rejected="gray60")) +
   theme_bw() +
   ggtitle(expression(~italic(S))) +
@@ -78,26 +80,27 @@ P = splitResults$piPerBin %>%
   select(starts_with("V"), "Status") %>%
   pivot_longer(!Status, names_to = "variable") %>% 
   mutate(binNum = replaceColnames$binNum[match(variable,replaceColnames$OG)],
-         variable = replaceColnames$binName[match(variable,replaceColnames$OG)]) 
+         variable = replaceColnames$binName[match(variable,replaceColnames$OG)],
+         variable = factor(variable, levels = orderBins)) 
 
-densityP = ggplot(P %>% filter(binNum <= 13),
+densityP = ggplot(P %>% filter(binNum <= 14),
        aes(value, fill=Status)) + 
   geom_density() + 
-  facet_wrap(~variable) +
+  facet_wrap(~variable, scales = "free") +
   scale_fill_manual(values=c(Accepted="blue", Rejected="gray60")) +
   theme_bw() +
   ggtitle(expression(pi)) +
   theme(plot.title = element_text(size=24, hjust = 0.5, face = "bold"))
 
-ggarrange(densityS + labs(x="Count per Bin", y=""), 
-          densityP + labs(x="Count per Bin", y=""), 
+ggarrange(densityS + labs(x="Count per bin", y=""), 
+          densityP + labs(x="Count per bin", y=""), 
           ncol = 2, 
           nrow = 1, 
           common.legend = T, 
           legend = "bottom")
 
 #Compare to real data
-realData = read.delim("~/Documents/DogProject_Clare/LocalRscripts/DemographicInference/InputData/EWSamps_allChroms_NeutralRegions_het_1000win_1000step_ABCinputFile.txt") %>% 
+realData = read_delim("~/Documents/DogProject_Clare/LocalRscripts/DemographicInference/InputData/EWSamps_allChroms_NeutralRegions_het_1000win_1000step_ABCinputFile.txt", delim = "\t") %>% 
   filter(sites_total >= 200)
 
 HetsRealData = realData %>%
@@ -132,31 +135,46 @@ empiricalPlottingDF = HetsRealData %>% #want to use data frame with the most bin
          valuePi = replace_na(valuePi, 0),
          piRanges = rangesDF$ranges[match(bin, rangesDF$bin)]) %>%
   dplyr::rename(valueS = n, binNum = bin) 
-
 #Add everything to the seg sites data frame
 simulationsPlot = S %>%
   mutate(Data = "Simulated",
          valuePi = P$value,
          piRanges = rangesDF$ranges[match(binNum, rangesDF$bin)]) %>%
   dplyr::rename(valueS = value) %>%
-  filter(binNum %in% empiricalPlottingDF$binNum) #subset down to bins in real data 
+  filter(binNum %in% empiricalPlottingDF$binNum)  
 
 #Labels for S and Pi ranges facet wrap 
 empiricalPlottingDF$wrapLabels = glue('{empiricalPlottingDF$binNum}:{empiricalPlottingDF$piRanges}')
 simulationsPlot$wrapLabels = glue('{simulationsPlot$binNum}:{simulationsPlot$piRanges}')
+#order labels
+orderLabels = unique(simulationsPlot$wrapLabels)
+empiricalPlottingDF$wrapLabels = factor(empiricalPlottingDF$wrapLabels, levels = orderLabels)
+simulationsPlot$wrapLabels = factor(simulationsPlot$wrapLabels, levels = orderLabels)
 
-#Use gsub to parse the labels
+#Now plot
+library("scales")
+integer_breaks <- function(n = 5, ...) {
+  breaker <- pretty_breaks(n, ...)
+  function(x) {
+    breaks <- breaker(x)
+    breaks[breaks == floor(breaks)]
+  }
+} #This function removes non-integer breaks
+
 ggplot() + 
-  geom_point(data = simulationsPlot %>% filter(binNum < 13),  aes(x=valueS, y=valuePi, colour=Status, shape = Data)) + 
-  geom_point(data = empiricalPlottingDF %>% filter(binNum < 13),  aes(x=valueS, y=valuePi, shape = Data), colour="red") +
-  #facet_wrap(~variable) +
+  geom_point(data = simulationsPlot %>% filter(binNum <= 14),  aes(x=valueS, y=valuePi, colour=Status, shape = Data)) + 
+  geom_point(data = empiricalPlottingDF %>% filter(binNum <= 14),  aes(x=valueS, y=valuePi, shape = Data), colour="red") +
   #facet_wrap(~wrapLabels, scales = "free", labeller = label_bquote(Theta[W]==.(gsub(":.*", "",wrapLabels))~"&"~ pi==.(gsub(".*:", "",wrapLabels)))) +
-  facet_wrap(~wrapLabels, scales = "free", labeller = label_bquote(italic(S)==.(gsub(":.*", "",wrapLabels))~"&"~ pi==.(gsub(".*:", "",wrapLabels)))) +
+  facet_wrap(~wrapLabels, 
+             scales = "free", 
+             labeller = label_bquote(italic(S)==.(gsub(":.*", "",wrapLabels))~"&"~ pi==.(gsub(".*:", "",wrapLabels)))) +
+  scale_x_continuous(breaks = integer_breaks()) +
+  scale_y_continuous(breaks = integer_breaks()) +
   scale_colour_manual(values=c(Accepted="blue", Rejected="gray60")) +
   scale_shape_manual(name = "Data", values = c(Empirical=8, Simulated = 16)) + 
   guides(color = guide_legend(order = 0),
          shape = guide_legend(order = 1)) +
-theme_bw() +
+  theme_bw() +
   #labs(x=expression("Count per bin" ~ Theta[W]), y=expression("Count per bin" ~ pi)) +
   labs(x=expression("Count per bin" ~ italic(S)), y=expression("Count per bin" ~ pi)) +
   theme(axis.text.x = element_text(size  = 20), 
