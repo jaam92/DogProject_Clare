@@ -5,6 +5,24 @@ library(dplyr)
 library(mgsub)
 library(data.table)
 
+#Functions
+###Make a folded SFS###
+#THIS IS BERNARD's ORIGINAL >> need to add 0 to front and end to stand in for monomorphic (don't need to do this if it came from dadi)
+fold <- function(SFSCountCol, n, norm=TRUE){
+  if (length(SFSCountCol) < (n+1)){
+    data = c(SFSCountCol, rep(0,(n+1)-length(SFSCountCol)))
+  }
+  data = SFSCountCol[2:n] # adds together sfs and backwards sfs
+  data_fold = data + rev(data) # takes first half of that added together sfs (but not middle entry)
+  data_fold = data_fold[1:(n/2-1)]# adds middle entry that didn't have anything added to the end
+  data_fold = c(data_fold,data[(n/2)])# truncates and sums up remaining fields if desired (not needed here)
+  #data_trunc = c(data_fold[1:(trunc-1)],sum(data_fold[trunc:length(data_fold)]))
+  #if (norm){
+  #  data_trunc = data_trunc/sum(data_trunc)
+  #}
+  #return(data_trunc)
+  return(data_fold)
+}
 #Load files
 setwd("~/Documents/DogProject_Clare/LocalRscripts/SFS")
 fnames = list.files(pattern = "\\_SFS_allChroms_SummaryFile_N6.txt$")
@@ -26,7 +44,7 @@ TotalCounts = PlottingUnfolded %>%
 
 PlottingUnfolded$Proportional = PlottingUnfolded$WholeGenomeCounts/(TotalCounts$TotalSites[match(PlottingUnfolded$Population, TotalCounts$Population)])
 
-#Order set colours
+#Prep for plotting
 orderPops = c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "Arctic Wolf", "Ethiopian Wolf", "Isle Royale")
 
 PlottingUnfolded$Population = factor(PlottingUnfolded$Population, levels = orderPops)
@@ -34,29 +52,21 @@ PlottingUnfolded$Population = factor(PlottingUnfolded$Population, levels = order
 cbPalette = c("Arctic Wolf" = "gray25", "Ethiopian Wolf" = "#D55E00",  "Isle Royale" = "steelblue", "Border Collie" = "#009E73", "Labrador Retriever" = "gold3", "Pug" = "mediumpurple4", "Tibetan Mastiff" = "#CC79A7")
 
 #Plot only the bins starting with singletons
-UnfoldedSFS = ggplot(PlottingUnfolded, aes(y=Proportional, x=FreqBin, fill=Population)) + geom_bar(stat = "identity", position = position_dodge(width = 0.9))  + scale_x_discrete(limits=1:11) + scale_fill_manual(values= cbPalette) + labs(x= "SNP Frequency", y= "Proportion of SNPs") + ggtitle("All Populations Whole Genome SFS") + theme_bw() + theme(axis.text.x = element_text(size  = 20), axis.text.y = element_text(size  = 20), plot.title=element_text(size=26, face = "bold", hjust=0.5), axis.title=element_text(size=24),legend.title=element_text(size=20), legend.text=element_text(size=20)) 
+UnfoldedSFS = ggplot(PlottingUnfolded, aes(y=Proportional, x=FreqBin, fill=Population)) + 
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9))  +
+  scale_x_continuous(breaks=1:11) + 
+  scale_fill_manual(values= cbPalette) + 
+  labs(x= "SNP Frequency", y= "Proportion of SNPs", title = "All Populations Whole Genome SFS") + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(size = 30), 
+        axis.text.y = element_text(size = 30), 
+        plot.title=element_text(size=32, face = "bold", hjust=0.5), 
+        axis.title=element_text(size=32), 
+        legend.title=element_text(size=24), 
+        legend.text=element_text(size=24))
 
 #print(UnfoldedSFS)
 
-###Make a folded SFS###
-#THIS IS BERNARD's ORIGINAL >> need to add 0 to front and end to stand in for monomorphic (don't need to do this if it came from dadi)
-fold <- function(SFSCountCol, n, norm=TRUE){
-  if (length(SFSCountCol) < (n+1)){
-    data = c(SFSCountCol, rep(0,(n+1)-length(SFSCountCol)))
-  }
-  data = SFSCountCol[2:n] # adds together sfs and backwards sfs
-  data_fold = data + rev(data) # takes first half of that added together sfs (but not middle entry)
-  data_fold = data_fold[1:(n/2-1)]# adds middle entry that didn't have anything added to the end
-  data_fold = c(data_fold,data[(n/2)])# truncates and sums up remaining fields if desired (not needed here)
-  #data_trunc = c(data_fold[1:(trunc-1)],sum(data_fold[trunc:length(data_fold)]))
-  #if (norm){
-  #  data_trunc = data_trunc/sum(data_trunc)
-  #}
-  #return(data_trunc)
-  return(data_fold)
-}
-
-#Split data frame and fold each SFS ***SOMETHING IS GOING WRONG HERE**** FIGURE IT OUT
 Unfolded = df %>%
   mutate(Population = substr(FileName,1,2)) %>%
   group_by(Population, FreqBin) %>%
@@ -77,7 +87,18 @@ TotalCountsFolded = PlottingFolded %>%
 
 PlottingFolded$Proportional = PlottingFolded$value/(TotalCountsFolded$TotalSites[match(PlottingFolded$variable, TotalCountsFolded$variable)])
 
-FoldedSFS = ggplot(PlottingFolded, aes(y=Proportional, x=bins, fill=variable)) + geom_bar(stat = "identity", position = position_dodge(width = 0.9))  + scale_fill_manual(values= cbPalette, name = "Population") + labs(x= "SNP Frequency", y= "Proportion of SNPs") + ggtitle("All Populations Whole Genome SFS") + theme_bw() + theme(axis.text.x = element_text(size  = 20), axis.text.y = element_text(size  = 20), plot.title=element_text(size=26, face = "bold", hjust=0.5), axis.title=element_text(size=24)) + theme(legend.title=element_text(size=20), legend.text=element_text(size=20)) + theme(legend.title=element_text(size=20), legend.text=element_text(size=20))
+FoldedSFS = ggplot(PlottingFolded, aes(y=Proportional, x=bins, fill=variable)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9))  +
+  scale_fill_manual(values= cbPalette, name = "Population") + 
+  scale_x_continuous(breaks=1:6) +
+  labs(x= "SNP Frequency", y= "Proportion of SNPs", title= "All Populations Whole Genome SFS") + 
+  theme_bw()  + 
+  theme(axis.text.x = element_text(size = 30), 
+        axis.text.y = element_text(size = 30), 
+        plot.title=element_text(size=32, face = "bold", hjust=0.5), 
+        axis.title=element_text(size=32), 
+        legend.title=element_text(size=24), 
+        legend.text=element_text(size=24))
 
 #print(FoldedSFS)
 
@@ -85,16 +106,15 @@ FoldedSFS = ggplot(PlottingFolded, aes(y=Proportional, x=bins, fill=variable)) +
 WolfOnlySFS = ggplot(PlottingFolded %>% 
          filter(variable == "Arctic Wolf"| variable == "Ethiopian Wolf"| variable == "Isle Royale" ), aes(y=Proportional, x=bins, fill=variable)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9))  +
+  scale_x_continuous(breaks=1:6) +
   scale_fill_manual(values= cbPalette, name = "Population") + 
-  labs(x= "SNP Frequency", y= "Proportion of SNPs") + 
-  ggtitle("Wolves Whole Genome SFS") + 
-  theme_bw() + 
-  theme(axis.text.x = element_text(size  = 24), 
-        axis.text.y = element_text(size  = 24), 
-        plot.title=element_text(size=26, face = "bold", hjust=0.5), 
-        axis.title=element_text(size=26),
-        legend.title=element_text(size=20), 
-        legend.text=element_text(size=20)) +
-  scale_x_continuous(breaks = c(1,2,3,4,5,6))
+  labs(x= "SNP Frequency", y= "Proportion of SNPs", title="Wolves Whole Genome SFS") + 
+  theme_bw()  + 
+  theme(axis.text.x = element_text(size = 30), 
+        axis.text.y = element_text(size = 30), 
+        plot.title=element_text(size=32, face = "bold", hjust=0.5), 
+        axis.title=element_text(size=32), 
+        legend.title=element_text(size=24), 
+        legend.text=element_text(size=24))
 
 #print(WolfOnlySFS)

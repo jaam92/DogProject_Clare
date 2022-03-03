@@ -56,7 +56,17 @@ cbPalette = c("Arctic Wolf" = "gray25", "Ethiopian Wolf" = "#D55E00",  "Isle Roy
 
 #Regular Boxplot
 dodge = position_dodge(width = 0.9)
-plotPi = ggplot(plotDF, aes(x=variable, y=value, colour = Population)) + geom_boxplot(size = 1, position = dodge) + scale_colour_manual(name = "Population", values = cbPalette) + theme_bw() + labs(x= "Population",y = expression(pi)) + theme(axis.text.x = element_text(size = 20), axis.text.y = element_text(size = 20), plot.title=element_text(size=24, face = "bold", hjust=0.5), axis.title=element_text(size=24), legend.title=element_text(size=20), legend.text=element_text(size=20))
+plotPi = ggplot(plotDF, aes(x=variable, y=value, colour = Population)) +
+  geom_boxplot(size = 1, position = dodge) + 
+  scale_colour_manual(name = "Population", values = cbPalette) + 
+  theme_bw() + 
+  labs(x= "Population",y = expression(pi)) + 
+  theme(axis.text.x = element_text(size = 30), 
+        axis.text.y = element_text(size = 30), 
+        plot.title=element_text(size=32, face = "bold", hjust=0.5), 
+        axis.title=element_text(size=32), 
+        legend.title=element_text(size=24), 
+        legend.text=element_text(size=24))
 
 plotGW = ggplot(plotDF %>% 
                 filter(variable == "genomeWide"), 
@@ -66,11 +76,11 @@ plotGW = ggplot(plotDF %>%
   scale_colour_manual(name = "Population", values = cbPalette) + 
   theme_bw() + 
   labs(x= "Population",y = expression(pi)) + 
-  theme(axis.text.x = element_text(size  = 24), 
-        axis.text.y = element_text(size  = 24), 
-        plot.title=element_text(size=24), 
-        axis.title=element_text(size=26),
-        legend.title=element_text(size=20), 
-        legend.text=element_text(size=20))
+  theme(axis.text.x = element_text(size = 30), 
+        axis.text.y = element_text(size = 30), 
+        plot.title=element_text(size=32, face = "bold", hjust=0.5), 
+        axis.title=element_text(size=32), 
+        legend.title=element_text(size=24), 
+        legend.text=element_text(size=24))
 
 plotGW_newLegend = plotGW + guides(color = guide_legend(override.aes = list(size = 10)))
