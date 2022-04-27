@@ -138,11 +138,11 @@ compFixedSites = function(inFile){
 #####Functions for plotting summary stat around genes
 
 #Fixed sites for 1Mb around any gene of interest
-countFixDerHomGene <- function(dataFrame, chromNum, winStart, winEnd, windowLength, geneName){
+countFixDerHomGene <- function(dataFrame, chromNum, winStart, winEnd, windowLength, geneName, pop, fixedAlleleCount){
   
   #read file in 
   fixedSites = dataFrame %>%
-    filter(EW == "18" & CHROM == chromNum) %>%
+    filter(!!sym(pop) == fixedAlleleCount & CHROM == chromNum) %>%
     mutate(bin = row_number())
   
   #overlap genes
@@ -170,11 +170,12 @@ countFixDerHomGene <- function(dataFrame, chromNum, winStart, winEnd, windowLeng
     theme_bw() + 
     #ggtitle(paste("Genes within", windowLength, "of", geneName, sep = " ")) +
     labs(x = "Gene name", 
-         y="Number of Derived homozygous fixed sites per-gene") +
-    theme(axis.text.x = element_text(size  = 20, hjust = 0.5, angle = 90, vjust = 0.8), 
-          axis.text.y = element_text(size = 20), 
-          axis.title = element_text(size=24, face = "bold"), 
-          plot.title = element_text(size=24, hjust = 0.5), 
+         y="Count of fixed derived homozygotes\n(per gene)") +
+    theme(axis.text.x = element_text(hjust = 0.5, angle = 90, vjust = 0.8, size = 40), 
+          axis.text.y = element_text(size = 40), 
+          #plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
+          axis.title = element_text(size = 42),
+          strip.text = element_text(size = 42),
           legend.position = "none")
   return(plotGene) 
 }
@@ -195,11 +196,12 @@ piWindowedAboutGene = function(dataFrame, chromNum, winStart, winEnd, windowLeng
     theme_bw() + 
     #ggtitle(paste("Genes within", windowLength, "of", geneName, sep = " ")) +
     labs(x = "Gene Name", 
-         y=expression("Mean" ~ pi ~ "per gene")) +
-    theme(axis.text.x = element_text(size  = 20, hjust = 0.5, angle = 90, vjust = 0.8), 
-          axis.text.y = element_text(size = 20), 
-          axis.title = element_text(size=24, face = "bold"), 
-          plot.title = element_text(size=24, hjust = 0.5), 
+         y=expression("Mean" ~ pi ~ "(per gene)")) +
+    theme(axis.text.x = element_text(hjust = 0.5, angle = 90, vjust = 0.8, size = 18), 
+          axis.text.y = element_text(size = 18), 
+          plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
+          axis.title = element_text(size = 20),
+          strip.text = element_text(size = 20),
           legend.position = "none")
   
   return(plotGenePi) 
