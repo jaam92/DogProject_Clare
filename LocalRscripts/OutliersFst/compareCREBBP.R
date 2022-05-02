@@ -52,11 +52,14 @@ allSitesDF_pi = rbind.data.frame(dfBC_pi, dfTM_pi, dfEW_pi, dfAW_pi) %>%
 
 ####Generate dataframes and compute Fst across all genes
 BC_FstPerGene = compFST("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/EW_vs_BC_allSites_rmNAN.weir.fst") %>%
-  mutate(Population = "BC")
+  mutate(Population = "BC") %>%
+  mutate(percentile = percent_rank(FstNormSNPCount))
 TM_FstPerGene = compFST("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/EW_vs_TM_allSites_rmNAN.weir.fst") %>%
-  mutate(Population = "TM")
+  mutate(Population = "TM") %>%
+  mutate(percentile = percent_rank(FstNormSNPCount))
 AW_FstPerGene = compFST("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/EW_vs_AW_allSites_rmNAN.weir.fst") %>%
-  mutate(Population = "AW")
+  mutate(Population = "AW") %>%
+  mutate(percentile = percent_rank(FstNormSNPCount))
 
 mergedDF_Fst = rbind.data.frame(BC_FstPerGene,TM_FstPerGene,AW_FstPerGene) %>%
   mutate(chrom = gsub("chr", "", GeneSet$chrom[match(GeneName, GeneSet$AbbrevName)]),
@@ -73,16 +76,20 @@ CREBBP_Fst = mergedDF_Fst %>%
   #ANC in EW and DER in comp group
 CountPerGene_EWvAW = compFixedSites("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FixedSites_EWvsAW_N6.txt") %>%
   filter(GeneName%in%EW_piPerGene$GeneName) %>% #only compare against gene sets used for computing pi
-  mutate(Population = "AW")
+  mutate(Population = "AW",
+         percentile = percent_rank(FixedSites)) %>%
+  na.omit()
 
 CountPerGene_EWvTM = compFixedSites("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FixedSites_EWvsTM_N6.txt") %>%
   filter(GeneName%in%EW_piPerGene$GeneName)  %>% 
-  mutate(Population = "TM") %>%
+  mutate(Population = "TM",
+         percentile = percent_rank(FixedSites)) %>%
   na.omit()
 
 CountPerGene_EWvBC = compFixedSites("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FixedSites_EWvsBC_N6.txt") %>%
   filter(GeneName%in%EW_piPerGene$GeneName) %>% 
-  mutate(Population = "BC") %>%
+  mutate(Population = "BC",
+         percentile = percent_rank(FixedSites)) %>%
   na.omit()
 
 mergedDF_FixedSites = rbind.data.frame(CountPerGene_EWvAW, CountPerGene_EWvTM, CountPerGene_EWvBC) %>%
@@ -211,7 +218,13 @@ x = ggplot() + theme_void() #blank plot between
 
 ggarrange(x, x, FSTComps, PiComps, OppFixedSitesComp, CREBBP_1Mb_fixedSites, nrow = 2) 
 
-top5 = read_delim("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/Top5perGenes_EWvsAll3.txt", col_names = c("GeneName"), delim = "\t") %>%
-  group_by(GeneName) %>%
-  count(name = "Occurences") %>%
-  arrange(desc(Occurences))
+top5 = read_delim("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/Top5perGenes_EWvsAll3.txt", delim = "\t", col_types = cols("c", "n"), col_names =c("GeneName","Occurences")) %>%
+  filter(Occurences == 3) %>%
+  mutate(pi = EW_piPerGene$meanPI[match(GeneName, EW_piPerGene$GeneName)],
+         FST_percentile_BC = BC_FstPerGene$percentile[match(GeneName, BC_FstPerGene$GeneName)],
+         FST_percentile_AW = AW_FstPerGene$percentile[match(GeneName, AW_FstPerGene$GeneName)],
+         FST_percentile_TM = TM_FstPerGene$percentile[match(GeneName, TM_FstPerGene$GeneName)],
+         FixedSites_percentile_BC = CountPerGene_EWvBC$percentile[match(GeneName, CountPerGene_EWvBC$GeneName)],
+         FixedSites_percentile_AW = CountPerGene_EWvAW$percentile[match(GeneName, CountPerGene_EWvAW$GeneName)],
+         FixedSites_percentile_TM = CountPerGene_EWvTM$percentile[match(GeneName, CountPerGene_EWvTM$GeneName)]) %>%
+  mutate_if(is.numeric, round, digits=3) 
