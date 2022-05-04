@@ -31,11 +31,11 @@ option_list <- list(
 #  filter(sites_passing > LengthThreshold) 
 #simulatedData = read.table(file=opt$SimInfile, col.names = c("Pi","windowedS"))
 #simulationParameterFile = read.table(file=opt$paramFile, col.names = c("NeCurr","NeAnc","Tbot"))
-setwd("~/DogProject_Clare/DemographicInference/jointDis")
+setwd("~/Documents/DogProject_Clare/LocalRscripts/DemographicInference/jointDis")
 LengthThreshold = 200
 SGETaskID = 38
-outFilePath = "~/DogProject_Clare/DemographicInference/jointDis"
-empiricalData = fread(file="~/DogProject_Clare/DemographicInference/InputData/EWSamps_allChroms_NeutralRegions_het_1000win_1000step_ABCinputFile.txt") %>% 
+outFilePath = "~/Documents/DogProject_Clare/LocalRscripts/DemographicInference/jointDis"
+empiricalData = fread(file="~/Documents/DogProject_Clare/LocalRscripts/DemographicInference/InputData/EWSamps_allChroms_NeutralRegions_het_1000win_1000step_ABCinputFile.txt") %>% 
   filter(sites_passing > LengthThreshold) 
 simulatedData = read.table(file="HetEWsamps_38.txt", col.names = c("Pi","windowedS"))
 simulationParameterFile = read.table(file="OutputParams38.txt", col.names = c("NeCurr","NeAnc","Tbot"))
