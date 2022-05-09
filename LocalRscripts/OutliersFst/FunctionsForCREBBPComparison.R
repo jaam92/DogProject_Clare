@@ -164,9 +164,9 @@ countFixDerHomGene <- function(dataFrame, chromNum, winStart, winEnd, windowLeng
     mutate(Label = ifelse(GeneName == geneName, T, F))
   
   plotGene = ggplot(CountPerGene, aes(x=GeneName, y=n, colour=Label)) + 
-    geom_point() +
+    geom_point(size = 2.5) +
     scale_colour_manual(values=c("blue","red"), guide = FALSE) + 
-    geom_text_repel(size = 10, aes(label=ifelse((GeneName == geneName) ,as.character(GeneName),'')), show.legend = F) + 
+    geom_text_repel(size = 16, aes(label=ifelse((GeneName == geneName) ,as.character(GeneName),'')), show.legend = F) + 
     theme_bw() + 
     #ggtitle(paste("Genes within", windowLength, "of", geneName, sep = " ")) +
     labs(x = "Gene name", 
@@ -190,9 +190,9 @@ piWindowedAboutGene = function(dataFrame, chromNum, winStart, winEnd, windowLeng
     mutate(Label = ifelse(GeneName == geneName, T, F))
   
   plotGenePi = ggplot(piPerGene, aes(x=GeneName, y=meanPI, colour=Label)) + 
-    geom_point() +
+    geom_point(size = 2.5) +
     scale_colour_manual(values=c("blue","red"), guide = FALSE) + 
-    geom_text_repel(size = 10, aes(label=ifelse((GeneName == geneName) ,as.character(GeneName),'')), show.legend = F) + 
+    geom_text_repel(size = 16, aes(label=ifelse((GeneName == geneName) ,as.character(GeneName),'')), show.legend = F) + 
     theme_bw() + 
     #ggtitle(paste("Genes within", windowLength, "of", geneName, sep = " ")) +
     labs(x = "Gene Name", 

@@ -138,11 +138,11 @@ PiComps = ggplot(data = mergedDF_pi, aes(meanPI, group=fullPopName)) +
   geom_histogram(aes(y = stat(count)/10045, fill=fullPopName), binwidth = 0.025, closed="right", boundary=-0.5, color="black") + ####10045 is the number of genes in comparison
   scale_fill_manual(name = "Population", values = cbPalette) + 
   geom_vline(data = CREBBP, aes(xintercept = meanPI), colour="black", linetype = "dashed") + 
-  geom_text(data = CREBBP, mapping = aes(x = x, y = y, label = pvalues), size = 12) +
+  geom_text(data = CREBBP, mapping = aes(x = x, y = y, label = pvalues), size = 16) +
   facet_wrap(~fullPopName, nrow = 4) +
   labs(x=expression("Mean" ~ pi ~ "(per gene)"), y = "Frequency") + 
-  scale_x_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) +
-  scale_y_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) +
+  #scale_x_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) +
+  #scale_y_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) +
   theme_bw()+ 
   theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 40), 
         axis.text.y = element_text(size = 40), 
@@ -166,7 +166,7 @@ CREBBP_Fst$pvalues = c(paste0("p = ", round(digits = 3, x = nrow(BC_FstPerGene[B
 #CREBBP_Fst$x = c(0.25, 0.25, 0.2)
 #CREBBP_Fst$y = c(240, 240, 240)
 CREBBP_Fst$x = c(0.15, 0.15, 0.15)
-CREBBP_Fst$y = c(0.12, 0.12, 0.12)
+CREBBP_Fst$y = c(0.10, 0.10, 0.10)
 
 #plot distribution with each species as facet
 #use sapply to get proportion per group
@@ -174,11 +174,11 @@ FSTComps = ggplot(mergedDF_Fst, aes(FstNormSNPCount, group=fullPopName)) +
   geom_histogram(aes(y =stat(count)/sapply(PANEL, FUN=function(x) sum(count[PANEL == x])), 
                      fill=fullPopName), binwidth = 0.025, closed="right", boundary=-0.5, color="black", fill="gray80") +
   geom_vline(data = CREBBP_Fst, aes(xintercept = FstNormSNPCount), colour="black", linetype="dashed") + 
-  geom_text(data = CREBBP_Fst, mapping = aes(x = x, y = y, label = pvalues), size = 12) +
+  geom_text(data = CREBBP_Fst, mapping = aes(x = x, y = y, label = pvalues), size = 16) +
   facet_wrap(~fullPopName, nrow = 3) +
   labs(x=expression("Mean" ~F[ST]~"(per gene)"), y="Frequency") + 
-  scale_x_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) +
-  scale_y_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) + 
+  #scale_x_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) +
+  #scale_y_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) + 
   theme_bw() + 
   theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 40), 
         axis.text.y = element_text(size = 40), 
@@ -201,9 +201,9 @@ CREBBP_FixedSites$y = c(0.35, 0.35, 0.35)
 OppFixedSitesComp = ggplot(mergedDF_FixedSites, aes(FixedSites, group=fullPopName)) + 
   geom_histogram(aes(y=stat(count)/sapply(PANEL, FUN=function(x) sum(count[PANEL == x]))), breaks = seq(0, 2000, by=50), closed="right", boundary=-0.5, color="black", fill="gray80") +
   geom_vline(data = CREBBP_FixedSites, aes(xintercept = FixedSites), colour="black", linetype="dashed") + 
-  geom_text(data = CREBBP_FixedSites, mapping = aes(x = x, y = y, label = pvalues), size = 12) +
+  geom_text(data = CREBBP_FixedSites, mapping = aes(x = x, y = y, label = pvalues), size = 16) +
   facet_wrap(~fullPopName, nrow = 3) +
-  scale_y_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) + 
+  #scale_y_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) + 
   labs(x="Count of oppositely fixed sites (per gene)", y="Frequency") + 
   theme_bw() + 
   theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 40), 
@@ -216,15 +216,21 @@ OppFixedSitesComp = ggplot(mergedDF_FixedSites, aes(FixedSites, group=fullPopNam
 
 x = ggplot() + theme_void() #blank plot between
 
-ggarrange(x, x, FSTComps, PiComps, OppFixedSitesComp, CREBBP_1Mb_fixedSites, nrow = 2) 
+ggarrange(x, x, FSTComps, PiComps, OppFixedSitesComp, CREBBP_1Mb_fixedSites, nrow = 2, ncol = 3) 
 
-top5 = read_delim("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/Top5perGenes_EWvsAll3.txt", delim = "\t", col_types = cols("c", "n"), col_names =c("GeneName","Occurences")) %>%
+
+#####Find pi and fst outliers that are as extreme as CREBBP
+FSTandPiOutliers = read_delim("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/Top5perGenes_EWvsAll3.txt", delim = "\t", col_types = cols("c", "n"), col_names =c("GeneName","Occurences")) %>%
   filter(Occurences == 3) %>%
-  mutate(pi = EW_piPerGene$meanPI[match(GeneName, EW_piPerGene$GeneName)],
-         FST_percentile_BC = BC_FstPerGene$percentile[match(GeneName, BC_FstPerGene$GeneName)],
-         FST_percentile_AW = AW_FstPerGene$percentile[match(GeneName, AW_FstPerGene$GeneName)],
-         FST_percentile_TM = TM_FstPerGene$percentile[match(GeneName, TM_FstPerGene$GeneName)],
-         FixedSites_percentile_BC = CountPerGene_EWvBC$percentile[match(GeneName, CountPerGene_EWvBC$GeneName)],
-         FixedSites_percentile_AW = CountPerGene_EWvAW$percentile[match(GeneName, CountPerGene_EWvAW$GeneName)],
-         FixedSites_percentile_TM = CountPerGene_EWvTM$percentile[match(GeneName, CountPerGene_EWvTM$GeneName)]) %>%
-  mutate_if(is.numeric, round, digits=3) 
+  mutate(Occurences = NULL,
+         pi = EW_piPerGene$meanPI[match(GeneName, EW_piPerGene$GeneName)],
+         FST_percentile_BC = BC_FstPerGene$percentile[match(GeneName, BC_FstPerGene$GeneName)]*100,
+         FixedSites_percentile_BC = CountPerGene_EWvBC$percentile[match(GeneName, CountPerGene_EWvBC$GeneName)]*100,
+         FST_percentile_AW = AW_FstPerGene$percentile[match(GeneName, AW_FstPerGene$GeneName)]*100,
+         FixedSites_percentile_AW = CountPerGene_EWvAW$percentile[match(GeneName, CountPerGene_EWvAW$GeneName)]*100,
+         FST_percentile_TM = TM_FstPerGene$percentile[match(GeneName, TM_FstPerGene$GeneName)]*100,
+         FixedSites_percentile_TM = CountPerGene_EWvTM$percentile[match(GeneName, CountPerGene_EWvTM$GeneName)]*100) %>%
+  filter(pi < 0.00483) %>% #filter to genes with values of pi at least as extreme as CREBBP
+  mutate_if(is.numeric, round, digits=4) 
+
+write.table(FSTandPiOutliers, "~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FSTOutlierPiAtLeastAsExtAsCREBBP_SummaryStats.txt", sep = "\t", quote = FALSE, col.names = TRUE, row.names = FALSE)
