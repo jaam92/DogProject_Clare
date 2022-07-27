@@ -234,4 +234,72 @@ FSTandPiOutliers = read_delim("~/Documents/DogProject_Clare/LocalRscripts/Outlie
   filter(pi < 0.00483) %>% #filter to genes with values of pi at least as extreme as CREBBP
   mutate_if(is.numeric, round, digits=4) 
 
-write.table(FSTandPiOutliers, "~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FSTOutlierPiAtLeastAsExtAsCREBBP_SummaryStats.txt", sep = "\t", quote = FALSE, col.names = TRUE, row.names = FALSE)
+#write.table(FSTandPiOutliers, "~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FSTOutlierPiAtLeastAsExtAsCREBBP_SummaryStats.txt", sep = "\t", quote = FALSE, col.names = TRUE, row.names = FALSE)
+
+
+
+
+####Supplementary figure 5
+#Comparison with EW
+mergedDF_Fst$Label = ifelse(mergedDF_Fst$percentile >= 0.95, "Top 5% Outliers","Remainder of Genes")
+
+EWComps_FST = ggplot(mergedDF_Fst, aes(x=FstNormSNPCount,y=SNPCount,colour=Label)) + 
+  geom_point() +  
+  scale_colour_manual(name = "Status", values=c("blue","red")) + 
+  geom_vline(data = CREBBP_Fst, aes(xintercept = FstNormSNPCount), colour="black", linetype="dashed", size = 1) +
+  facet_wrap(~fullPopName, nrow = 4) +
+  labs(x=expression("Mean" ~ F[ST] ~ "(per gene)"), y = "SNP Count") +  
+  theme_bw() + 
+  theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 40), 
+        axis.text.y = element_text(size = 40), 
+        #plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
+        axis.title = element_text(size = 42),
+        strip.text = element_text(size = 42),
+        legend.title=element_text(size=40), 
+        legend.text=element_text(size=38),
+        panel.spacing.y = unit(10, "mm"))
+
+
+#Comparison with border collie
+BCComp_EW_FstPerGene = compFST("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/EW_vs_BC_allSites_rmNAN.weir.fst") %>%
+  mutate(Population = "EW") %>%
+  mutate(percentile = percent_rank(FstNormSNPCount))
+
+BCComp_TM_FstPerGene = compFST("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/BC_vs_TM_allSites_rmNAN.weir.fst") %>%
+  mutate(Population = "TM") %>%
+  mutate(percentile = percent_rank(FstNormSNPCount))
+
+BCComp_AW_FstPerGene = compFST("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/BC_vs_AW_allSites_rmNAN.weir.fst") %>%
+  mutate(Population = "AW") %>%
+  mutate(percentile = percent_rank(FstNormSNPCount))
+
+BCComp_mergedDF_Fst = rbind.data.frame(BCComp_EW_FstPerGene,BCComp_TM_FstPerGene,BCComp_AW_FstPerGene) %>%
+  mutate(chrom = gsub("chr", "", GeneSet$chrom[match(GeneName, GeneSet$AbbrevName)]),
+         fullPopName = case_when(Population == "AW" ~ "border collie vs\n Arctic wolf",
+                                 Population == "EW" ~ "border collie vs\n Ethiopian wolf",
+                                 Population == "TM" ~ "border collie vs\n tibetan mastiff"))
+
+BCComp_mergedDF_Fst$Label = ifelse(BCComp_mergedDF_Fst$percentile >= 0.95, "Top 5% Outliers","Remainder of Genes")
+
+#data frame with CREBBP Fst
+BCComp_CREBBP_Fst = BCComp_mergedDF_Fst %>%
+  filter(GeneName == "CREBBP") 
+
+
+BCComps_FST = ggplot(BCComp_mergedDF_Fst, aes(x=FstNormSNPCount,y=SNPCount,colour=Label)) + 
+  geom_point() +  
+  scale_colour_manual(name = "Status", values=c("blue","red")) + 
+  geom_vline(data = BCComp_CREBBP_Fst, aes(xintercept = FstNormSNPCount), colour="black", linetype="dashed", size = 1) +
+  facet_wrap(~fullPopName, nrow = 4) +
+  labs(x=expression("Mean" ~ F[ST] ~ "(per gene)"), y = "SNP Count") +  
+  theme_bw() + 
+  theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 40), 
+        axis.text.y = element_text(size = 40), 
+        #plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
+        axis.title = element_text(size = 42),
+        strip.text = element_text(size = 42),
+        legend.title=element_text(size=40), 
+        legend.text=element_text(size=38),
+        panel.spacing.y = unit(10, "mm"))
+
+ggarrange(EWComps_FST, BCComps_FST, ncol = 2, common.legend = TRUE, legend = "top")
