@@ -6,7 +6,7 @@ library(dplyr)
 library(mgsub)
 
 #Plotting fxn and color palette
-cbPalette = c("Arctic Wolf" = "gray25", "Ethiopian Wolf" = "#D55E00",  "Isle Royale" = "steelblue", "Border Collie" = "#009E73", "Labrador Retriever" = "gold3", "Pug" = "mediumpurple4", "Tibetan Mastiff" = "#CC79A7")
+cbPalette = c("Arctic wolf" = "gray25", "Ethiopian wolf" = "#D55E00",  "Isle Royale wolf" = "steelblue", "border collie" = "#009E73", "labrador retriever" = "gold3", "pug" = "mediumpurple4", "tibetan mastiff" = "#CC79A7")
 
 plotFxn = function(dataFrame, colOfInterest, axisTitle) {
   RaincloudWithBoxPlot = ggplot(dataFrame, aes(x=Population, y=colOfInterest, colour=Population)) +
@@ -14,7 +14,7 @@ plotFxn = function(dataFrame, colOfInterest, axisTitle) {
     geom_point(aes(x = as.numeric(Population)-.15, y = colOfInterest, colour = Population),position = position_jitter(width = .05), size = 1, shape = 20) +
     geom_boxplot(aes(as.numeric(Population), y = colOfInterest, fill = Population), outlier.shape = NA, alpha = .5, width = .1, colour = "black") +
     coord_flip() +
-    guides(fill = FALSE, colour = FALSE) +
+    guides(fill = "none", colour = "none") +
     scale_colour_manual(values = cbPalette) +
     scale_fill_manual(values = cbPalette) + 
     labs(x="Population",y=paste0(axisTitle)) + 
@@ -36,8 +36,8 @@ PlotDF = df %>%
   mutate(CallableSites = LineCount - Missing)
 
 PlotDF$Population = mgsub(PlotDF$Population, 
-                          pattern =c("BC", "LB", "PG", "TM", "AW", "EW", "IR"), replacement =c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "Arctic Wolf",  "Ethiopian Wolf", "Isle Royale"))
-orderPops = c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "Arctic Wolf",  "Ethiopian Wolf", "Isle Royale")
+                          pattern =c("BC", "LB", "PG", "TM", "AW", "EW", "IR"), replacement =c("border collie", "labrador retriever", "pug", "tibetan mastiff", "Arctic wolf",  "Ethiopian wolf", "Isle Royale wolf"))
+orderPops = c("border collie", "labrador retriever", "pug", "tibetan mastiff", "Arctic wolf",  "Ethiopian wolf", "Isle Royale wolf")
 PlotDF$Population = factor(PlotDF$Population, levels = orderPops)
 
 ####Make Everything proportional 
@@ -119,8 +119,8 @@ ggarrange(SYAnnot, NSAnnot, nrow = 2)
 
 #Compute pvalues
 PlotDF$Population = mgsub(as.character(PlotDF$Population), 
-                          pattern =c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "Arctic Wolf",  "Ethiopian Wolf", "Isle Royale"),
-                          replacement =c("Dog", "Dog", "Dog", "Dog", "Wolf", "EW", "Wolf"))
+                          pattern =c("border collie", "labrador retriever", "pug", "tibetan mastiff", "Arctic wolf",  "Ethiopian wolf", "Isle Royale wolf"),
+                          replacement =c("Dog", "Dog", "Dog", "Dog", "wolf", "EW", "wolf"))
 
 means = PlotDF[,c(1:11, 20:31)] %>%
   group_by(Population) %>%
