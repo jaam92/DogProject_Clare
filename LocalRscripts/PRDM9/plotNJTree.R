@@ -6,8 +6,8 @@ library(TreeTools)
 library(ggpubr)
 
 #####Read the nexus format PRDM9 mafft aligned data in ######
-newickDat = ReadAsPhyDat("~/Documents/DogProject_Clare/LocalRscripts/PRDM9/NexusFormat_PRDM9_rename.txt")
-phyDatTree = phyDat(newickDat, type="DNA", levels = NULL)
+newickDat = ReadAsPhyDat("~/Documents/DogProject_Clare/LocalRscripts/PRDM9/NexusFormat_PRDM9_rename_noCat.txt")
+phyDatTree = as.phyDat(newickDat, type = "DNA")
 
 #####Check out models for distance matrix based on loglikelihood
 #model = modelTest(phyDatTree, multicore=TRUE, mc.cores=2)
@@ -20,7 +20,7 @@ phyDatTree = phyDat(newickDat, type="DNA", levels = NULL)
 
 #Make neighbor joining tree
 dna_dist = dist.ml(phyDatTree, model="JC69")
-tree_NJ  = NJ(dna_dist)
+tree_NJ  = njs(dna_dist)
 
 #Maximum likelihood 
 fit = pml(tree_NJ, phyDatTree)
@@ -55,12 +55,12 @@ PRDM9Tree = ggtree(bootstrap.jc.highconf, layout = "rectangular") +
         legend.text=element_text(size=16))
 
 #######Read the GAPDH nexus format mafft aligned data in ########
-newickDat = ReadAsPhyDat("~/Documents/DogProject_Clare/LocalRscripts/PRDM9/NexusFormat_GAPDH_rename.txt")
-phyDatTree = phyDat(newickDat, type="DNA", levels = NULL)
+newickDat = ReadAsPhyDat("~/Documents/DogProject_Clare/LocalRscripts/PRDM9/NexusFormat_GAPDH_rename_noCat.txt")
+phyDatTree = as.phyDat(newickDat, type = "DNA")
 
 #Make neighbor joining tree
 dna_dist = dist.ml(phyDatTree, model="JC69")
-tree_NJ  = NJ(dna_dist)
+tree_NJ  = nj(dna_dist)
 
 #Maximum likelihood 
 fit = pml(tree_NJ, phyDatTree)
@@ -76,7 +76,7 @@ bootstrap.jc.highconf$tip.label = c("Human", "Rhesus Macaque", "Ethiopian Wolf",
 GAPDHTree = ggtree(bootstrap.jc.highconf, layout = "rectangular") +
   theme_tree2() + 
   geom_tiplab(size=8) + 
-  ggtitle("PRDM9") + 
+  ggtitle("GAPDH") + 
   theme(axis.text.x = element_text(size= 16), 
         axis.text.y = element_blank(), 
         plot.title=element_text(size=16, hjust=0.5), 
@@ -87,5 +87,4 @@ GAPDHTree = ggtree(bootstrap.jc.highconf, layout = "rectangular") +
 geneTrees = ggarrange(PRDM9Tree, 
                       GAPDHTree, 
                       align = 'hv', 
-                      nrow = 2,
-                      labels=c("A","B"))
+                      nrow = 2)
