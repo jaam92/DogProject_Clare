@@ -191,7 +191,7 @@ piWindowedAboutGene = function(dataFrame, chromNum, winStart, winEnd, windowLeng
   
   plotGenePi = ggplot(piPerGene, aes(x=GeneName, y=meanPI, colour=Label)) + 
     geom_point(size = 2.5) +
-    scale_colour_manual(values=c("blue","red"), guide = FALSE) + 
+    scale_colour_manual(values=c("blue","red"), guide = "none") + 
     geom_text_repel(size = 16, aes(label=ifelse((GeneName == geneName) ,as.character(GeneName),'')), show.legend = F) + 
     theme_bw() + 
     #ggtitle(paste("Genes within", windowLength, "of", geneName, sep = " ")) +

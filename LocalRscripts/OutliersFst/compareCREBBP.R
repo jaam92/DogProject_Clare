@@ -101,6 +101,10 @@ mergedDF_FixedSites = rbind.data.frame(CountPerGene_EWvAW, CountPerGene_EWvTM, C
 ###Fixed derived sites in ethiopian wolves only
 fixedEW = read_delim("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FixedDerivedSites_EW_N9.txt", delim = "\t")
 CREBBP_1Mb_fixedSites = countFixDerHomGene(fixedEW,"chr6", 36412372, 38531822, "1Mb", "CREBBP", "EW", "18")
+MKL1_1Mb_fixedSites = countFixDerHomGene(fixedEW,"chr10", 23599593, 25752076, "1Mb", "MKL1", "EW", "18")
+PYGB_1Mb_fixedSites = countFixDerHomGene(fixedEW,"chr23", 426984, 2491240, "1Mb", "PYGB", "EW", "18")
+CDK8_1Mb_fixedSites = countFixDerHomGene(fixedEW,"chr25", 12058947, 14178073, "1Mb", "CDK8", "EW", "18")
+ggarrange(CREBBP_1Mb_fixedSites, MKL1_1Mb_fixedSites, PYGB_1Mb_fixedSites, CDK8_1Mb_fixedSites, ncol = 1, nrow = 4, common.legend = TRUE, legend = "bottom")
 
 #data frame with CREBBP fixed sites
 CREBBP_FixedSites = mergedDF_FixedSites %>%
