@@ -6,7 +6,7 @@ library(RColorBrewer)
 
 #Load in non-qc'd files
 setwd("~/Documents/DogProject_Clare/LocalRscripts/ROH")
-orderPops = c("Border Collie", "Labrador Retriever", "Pug", "Tibetan Mastiff", "Arctic Wolf", "Ethiopian Wolf", "Isle Royale")
+orderPops = c("border collie", "labrador retriever", "pug", "tibetan mastiff", "Arctic wolf", "Ethiopian wolf", "Isle Royale wolf")
 Individuals = read_delim("~/Documents/DogProject_Clare/LocalRscripts/Dogs2Keep.txt", delim="\t", col_names = c("Sample"))
 
 bcfTools_map = read_delim("allPops_bcfTools_withGenMap.LROH", delim="\t") %>% 
@@ -58,19 +58,21 @@ aggVLongROH = allComparisons %>%
 FinalDF = rbind.data.frame(aggIntROH, aggLongROH, aggVLongROH) %>% 
   mutate(Range = factor(Range, levels=c("[10-63)Mb","[1-10)Mb","[0.1-1)Mb")),
          Population = substr(Sample, 1,2),
-         Population = str_replace_all(Population,pattern=c("BC" = "Border Collie", "LB" = "Labrador Retriever", "PG" = "Pug", "TM" = "Tibetan Mastiff", "AW" = "Arctic Wolf", "EW" = "Ethiopian Wolf", "IR" = "Isle Royale")),
+         Population = str_replace_all(Population,pattern=c("BC" = "border collie", "LB" = "labrador retriever", "PG" = "pug", "TM" = "tibetan mastiff", "AW" = "Arctic wolf", "EW" = "Ethiopian wolf", "IR" = "Isle Royale wolf")),
          Population = factor(Population, levels = orderPops),
          method = gsub("_", " ", method)) 
 
 ##
-ggplot(FinalDF, aes(x=Sample, y=totalLenGb, fill=Range)) + 
+compMethods = ggplot(FinalDF, aes(x=Sample, y=totalLenGb, fill=Range)) + 
   geom_col()  + 
   facet_wrap(~ method) +
   coord_flip() + 
-  scale_fill_manual(values = c("[0.1-1)Mb"= "yellow", "[1-10)Mb" = "orange", "[10-63)Mb" = "red"), 
+  scale_fill_manual(values = c("[0.1-1)Mb"= "bisque3", 
+                               "[1-10)Mb" = "darkgoldenrod",
+                               "[10-63)Mb" = "indianred4"), 
                     breaks = c("[0.1-1)Mb","[1-10)Mb", "[10-63)Mb"), 
                     name = "Range") + 
-  labs(y = "Total amount of genome in ROH(Gb)\nper length class", x = "Population") + 
+  labs(y = "Total amount of genome in ROH(Gb)\nper length class", x = "Individual") + 
   theme_bw() + 
   theme(axis.text.x = element_text(size = 20), 
         axis.text.y = element_text(size = 10), 
@@ -81,7 +83,7 @@ ggplot(FinalDF, aes(x=Sample, y=totalLenGb, fill=Range)) +
         legend.text = element_text(size=18))
 
 #use color palette
-cbPalette = c("Arctic Wolf" = "gray25", "Ethiopian Wolf" = "#D55E00",  "Isle Royale" = "steelblue", "Border Collie" = "#009E73", "Labrador Retriever" = "gold3", "Pug" = "mediumpurple4", "Tibetan Mastiff" = "#CC79A7")
+cbPalette = c("Arctic wolf" = "gray25", "Ethiopian wolf" = "#D55E00",  "Isle Royale wolf" = "steelblue", "border collie" = "#009E73", "labrador retriever" = "gold3", "pug" = "mediumpurple4", "tibetan mastiff" = "#CC79A7")
 
 FROH = rbind.data.frame(vcfTools, bcfTools_map, bcfTools_Nomap) %>%
   mutate(ROH_length = as.numeric(ROH_length)) %>%
@@ -91,13 +93,13 @@ FROH = rbind.data.frame(vcfTools, bcfTools_map, bcfTools_Nomap) %>%
   ungroup() %>%
   mutate(FROH = ROH_length/2500000000,
          Population = substr(Sample, 1,2),
-         Population = str_replace_all(Population,pattern=c("BC" = "Border Collie", "LB" = "Labrador Retriever", "PG" = "Pug", "TM" = "Tibetan Mastiff", "AW" = "Arctic Wolf", "EW" = "Ethiopian Wolf", "IR" = "Isle Royale")),
+         Population = str_replace_all(Population,pattern=c("BC" = "border collie", "LB" = "labrador retriever", "PG" = "pug", "TM" = "tibetan mastiff", "AW" = "Arctic wolf", "EW" = "Ethiopian wolf", "IR" = "Isle Royale wolf")),
          Population = factor(Population, levels = orderPops),
          method = gsub("_", " ", method))
 
 dodge = position_dodge(width = 0.9)
 
-ggplot(FROH, aes(x=Population, y=FROH, colour = method)) + 
+compFROH = ggplot(FROH, aes(x=Population, y=FROH, colour = method)) + 
   scale_colour_brewer(name = "Method", palette="Set2") + 
   geom_violin(size=1, position = dodge)  + 
   geom_point(position = dodge, show.legend = F) +
@@ -111,4 +113,4 @@ ggplot(FROH, aes(x=Population, y=FROH, colour = method)) +
         legend.text=element_text(size=18))
 
 
-
+ggarrange(compMethods, compFROH, nrow = 2, ncol = 1)
