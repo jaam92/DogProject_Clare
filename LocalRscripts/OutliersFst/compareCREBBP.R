@@ -1,93 +1,107 @@
-#Load libraries and set working directory
+#Load Libraries
+library(tidyverse)
+library(data.table)
 library(ggrepel)
 library(ggpubr)
-setwd("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst")
+source("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FunctionsForCREBBPComparison.R") #Load up functions and parse gene sets need to source this after reading in genes file
 
 #Load gene files
 genes = read.delim("~/Documents/DogProject_Jaz/LocalRscripts/CaseControlROH/EnsemblGenes_CanFam3.1.bed", sep = "\t")
 gene_names = read.table("~/Documents/DogProject_Jaz/LocalRscripts/CaseControlROH/EnsemblGenes_CanFam3.1_geneNames.txt")
 
-source("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FunctionsForCREBBPComparison.R") #Load up functions and parse gene sets need to source this after reading in genes file
+####Create data frames with pi
+setwd("~/Documents/DogProject_Clare/LocalRscripts/ComputeandPlotPi/N6_Curr/perPopulationperGene")
+fnames = list.files(pattern = "\\PerPopulation.pi$")
 
-#Generate Dataframes for pi
-dfBC_pi = makeDataFrames("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/BC_allSites.sites.pi") %>%
-  mutate(Population = "BC")
-dfEW_pi = makeDataFrames("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/EW_allSites.sites.pi") %>%
-  mutate(Population = "EW")
-dfTM_pi = makeDataFrames("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/TM_allSites.sites.pi") %>%
-  mutate(Population = "TM")
-dfAW_pi = makeDataFrames("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/AW_allSites.sites.pi") %>%
-  mutate(Population = "AW")
 
-#Compute Pi across all genes
-BC_piPerGene = computePI(dfBC_pi, "BC")
-EW_piPerGene = computePI(dfEW_pi, "EW")
-TM_piPerGene = computePI(dfTM_pi, "TM")
-AW_piPerGene = computePI(dfAW_pi, "AW")
+df = rbindlist(sapply(fnames, read.delim, simplify = FALSE), use.names = TRUE) %>%
+  dplyr::rename(c("meanPi" = "pi", "GeneName"="gene"))
 
-#Finescale evaluation of Pi for CREBBP
-BC_CREBBP = computePI_CREBBP(dfBC_pi, "BC")
-EW_CREBBP = computePI_CREBBP(dfEW_pi, "EW")
-TM_CREBBP = computePI_CREBBP(dfTM_pi, "TM")
-AW_CREBBP = computePI_CREBBP(dfAW_pi, "AW")
+dfEW_pi = df %>%
+  filter(population == "EW") %>%
+  mutate(percentile = percent_rank(meanPi))
 
-mergedDF_pi = rbind.data.frame(BC_piPerGene,TM_piPerGene,EW_piPerGene, AW_piPerGene) %>%
-  mutate(chrom = gsub("chr", "", GeneSet$chrom[match(GeneName, GeneSet$AbbrevName)]),
-         fullPopName = case_when(Population == "AW" ~ "Arctic wolf",
-                                 Population == "BC" ~ "border collie",
-                                 Population == "TM" ~ "tibetan mastiff",
-                                 Population == "EW" ~ "Ethiopian wolf")) 
+dfAW_pi = df %>%
+  filter(population == "AW") %>%
+  mutate(percentile = percent_rank(meanPi))
 
-#data frame with CREBBP
-CREBBP = mergedDF_pi %>%
-  filter(GeneName == "CREBBP") 
+dfTM_pi = df %>%
+  filter(population == "TM") %>%
+  mutate(percentile = percent_rank(meanPi))
 
-allSitesDF_pi = rbind.data.frame(dfBC_pi, dfTM_pi, dfEW_pi, dfAW_pi) %>%
+dfBC_pi = df %>%
+  filter(population == "BC") %>%
+  mutate(percentile = percent_rank(meanPi))
+
+
+mergedDF_pi = rbind.data.frame(dfBC_pi, dfTM_pi, dfEW_pi, dfAW_pi) %>%
+  mutate(fullPopName = case_when(population == "AW" ~ "Arctic wolf",
+                                 population == "BC" ~ "border collie",
+                                 population == "TM" ~ "tibetan mastiff",
+                                 population == "EW" ~ "Ethiopian wolf"))
+
+CREBBP = rbind.data.frame(dfBC_pi, dfTM_pi, dfEW_pi, dfAW_pi) %>%
   filter(GeneName == "CREBBP") %>%
-  mutate(fullPopName = case_when(Population == "AW" ~ "Arctic wolf",
-                                 Population == "BC" ~ "border collie",
-                                 Population == "TM" ~ "tibetan mastiff",
-                                 Population == "EW" ~ "Ethiopian wolf"))
+  mutate(fullPopName = case_when(population == "AW" ~ "Arctic wolf",
+                                 population == "BC" ~ "border collie",
+                                 population == "TM" ~ "tibetan mastiff",
+                                 population == "EW" ~ "Ethiopian wolf"))
+
+#computeP-values
+CREBBP$pvalues = c(paste0("p = ", round(digits = 3, x = nrow(dfBC_pi[dfBC_pi$meanPi<=4.016414e-05, ])/nrow(dfBC_pi)), sep=""), 
+                   paste0("p = ", round(digits = 3, x = nrow(dfTM_pi[dfTM_pi$meanPi<=1.077712e-04, ])/nrow(dfTM_pi)), sep=""), 
+                   paste0("p = ", round(digits = 3, x = nrow(dfEW_pi[dfEW_pi$meanPi<=4.265475e-05, ])/nrow(dfEW_pi)), sep=""), 
+                   paste0("p = ", round(digits = 3, x = nrow(dfAW_pi[dfAW_pi$meanPi<=1.188775e-04, ])/nrow(dfAW_pi)), sep=""))
+
+CREBBP$x = c(0.015, 0.015, 0.015, 0.015) 
+CREBBP$y = c(0.25, 0.25, 0.25, 0.25)
+
+####Create data frames for Fst 
+setwd("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/") #same directory for fst and fixed sites
+fnames = list.files(pattern = "\\mean.fst$")
 
 
-####Generate dataframes and compute Fst across all genes
-BC_FstPerGene = compFST("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/EW_vs_BC_allSites_rmNAN.weir.fst") %>%
-  mutate(Population = "BC") %>%
-  mutate(percentile = percent_rank(FstNormSNPCount))
-TM_FstPerGene = compFST("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/EW_vs_TM_allSites_rmNAN.weir.fst") %>%
-  mutate(Population = "TM") %>%
-  mutate(percentile = percent_rank(FstNormSNPCount))
-AW_FstPerGene = compFST("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/EW_vs_AW_allSites_rmNAN.weir.fst") %>%
-  mutate(Population = "AW") %>%
-  mutate(percentile = percent_rank(FstNormSNPCount))
+mergedDF_fst = rbindlist(sapply(fnames, read.delim, simplify = FALSE), use.names = TRUE, idcol = "FILENAME") %>%
+  dplyr::rename(c("meanFst" = "fst", "GeneName"="gene", "Comparison"="FILENAME")) %>%
+  mutate(Comparison = gsub("_allSites_rmNAN.weir.perGene.mean.fst", "", Comparison),
+         fullPopName = case_when(Comparison == "EW_vs_AW" ~ "Ethiopian wolf vs\n Arctic wolf",
+                                 Comparison == "EW_vs_BC" ~ "Ethiopian wolf vs\n border collie",
+                                 Comparison == "EW_vs_TM" ~ "Ethiopian wolf vs\n tibetan mastiff",
+                                 Comparison == "BC_vs_AW" ~ "border collie vs\n Arctic wolf",
+                                 Comparison == "BC_vs_TM" ~ "border collie vs\n tibetan mastiff"))
 
-mergedDF_Fst = rbind.data.frame(BC_FstPerGene,TM_FstPerGene,AW_FstPerGene) %>%
-  mutate(chrom = gsub("chr", "", GeneSet$chrom[match(GeneName, GeneSet$AbbrevName)]),
-         fullPopName = case_when(Population == "AW" ~ "Ethiopian wolf vs\n Arctic wolf",
-                                 Population == "BC" ~ "Ethiopian wolf vs\n border collie",
-                                 Population == "TM" ~ "Ethiopian wolf vs\n tibetan mastiff"))
+split_mergedDF_fst = split(mergedDF_fst, f = mergedDF_fst$Comparison) 
 
-#data frame with CREBBP Fst
-CREBBP_Fst = mergedDF_Fst %>%
+CREBBP_fst = mergedDF_fst %>%
   filter(GeneName == "CREBBP") 
+
+#compute p-values
+CREBBP_fst$pvalues = c(paste0("p = ", round(digits = 3, x = nrow(split_mergedDF_fst$BC_vs_AW[split_mergedDF_fst$BC_vs_AW$meanFst>=0.07775059, ])/nrow(split_mergedDF_fst$BC_vs_AW)), sep=""), 
+                       paste0("p = ", round(digits = 3, x = nrow(split_mergedDF_fst$BC_vs_TM[split_mergedDF_fst$BC_vs_TM$meanFst>=0.02993633, ])/nrow(split_mergedDF_fst$BC_vs_TM)), sep=""), 
+                       paste0("p = ", round(digits = 3, x = nrow(split_mergedDF_fst$EW_vs_AW[split_mergedDF_fst$EW_vs_AW$meanFst>=0.88625552, ])/nrow(split_mergedDF_fst$EW_vs_AW)), sep=""), 
+                       paste0("p = ", round(digits = 3, x = nrow(split_mergedDF_fst$EW_vs_BC[split_mergedDF_fst$EW_vs_BC$meanFst>=0.89182346, ])/nrow(split_mergedDF_fst$EW_vs_BC)), sep=""), 
+                       paste0("p = ", round(digits = 3, x = nrow(split_mergedDF_fst$EW_vs_TM[split_mergedDF_fst$EW_vs_TM$meanFst>=0.86156290, ])/nrow(split_mergedDF_fst$EW_vs_TM)), sep=""))
+
+CREBBP_fst$x = c(0.15, 0.15, 0.15, 0.15, 0.15)
+CREBBP_fst$y = c(0.10, 0.10, 0.10, 0.10, 0.10)
 
 ####Data frames for fixed sites sites can be fixed as follows:
   #ANC in comp group and DER in EW
   #ANC in EW and DER in comp group
 CountPerGene_EWvAW = compFixedSites("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FixedSites_EWvsAW_N6.txt") %>%
-  filter(GeneName%in%EW_piPerGene$GeneName) %>% #only compare against gene sets used for computing pi
+  filter(GeneName%in%mergedDF_fst$GeneName) %>% #only compare against gene sets used for computing pi
   mutate(Population = "AW",
          percentile = percent_rank(FixedSites)) %>%
   na.omit()
 
 CountPerGene_EWvTM = compFixedSites("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FixedSites_EWvsTM_N6.txt") %>%
-  filter(GeneName%in%EW_piPerGene$GeneName)  %>% 
+  filter(GeneName%in%mergedDF_fst$GeneName)  %>% 
   mutate(Population = "TM",
          percentile = percent_rank(FixedSites)) %>%
   na.omit()
 
 CountPerGene_EWvBC = compFixedSites("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FixedSites_EWvsBC_N6.txt") %>%
-  filter(GeneName%in%EW_piPerGene$GeneName) %>% 
+  filter(GeneName%in%mergedDF_pi$GeneName) %>% 
   mutate(Population = "BC",
          percentile = percent_rank(FixedSites)) %>%
   na.omit()
@@ -115,89 +129,41 @@ cbPalette = c("Arctic wolf" = "gray25", "Ethiopian wolf" = "#D55E00",  "Isle Roy
 scaleFUN <- function(x) sprintf("%.1f", x) #round x and y axis digits 
 dodge = position_dodge(width = 0.9)
 
-####Plots for pi
-ggplot(mergedDF_pi, aes(x=fullPopName,y=meanPI,colour=fullPopName)) + 
-  geom_violin(size=1, position = dodge)  + 
-  scale_colour_manual(name = "Population", values = cbPalette) + 
-  ylab(expression("Mean" ~ pi ~ "(per gene)")) + 
-  theme_bw() + 
-  theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 16), 
-        axis.text.y = element_text(size = 16), 
-        plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
-        axis.title = element_text(size = 16))
-
-#plot distribution with each species as facet
-CREBBP$pvalues = c(paste0("p = ", round(digits = 3, x = nrow(BC_piPerGene[BC_piPerGene$meanPI<=0.0228, ])/nrow(BC_piPerGene)), sep=""), 
-                   paste0("p = ", round(digits = 3, x = nrow(TM_piPerGene[TM_piPerGene$meanPI<=0.0417, ])/nrow(TM_piPerGene)), sep=""), 
-                   paste0("p = ", round(digits = 3, x = nrow(EW_piPerGene[EW_piPerGene$meanPI<=0.00482, ])/nrow(EW_piPerGene)), sep=""), 
-                   paste0("p = ", round(digits = 3, x = nrow(AW_piPerGene[AW_piPerGene$meanPI<=0.0174, ])/nrow(AW_piPerGene)), sep=""))
-#uncomment these coordinates if only using counts
-#CREBBP$x = c(0.2, 0.2, 0.1, 0.3) 
-#CREBBP$y = c(290, 290, 890, 290)
-CREBBP$x = c(0.25, 0.25, 0.25, 0.25) 
-CREBBP$y = c(0.5, 0.5, 0.5, 0.5)
-
-#plot distribution with each population as facet
-PiComps = ggplot(data = mergedDF_pi, aes(meanPI, group=fullPopName)) + 
-  geom_histogram(aes(y = stat(count)/10045, fill=fullPopName), binwidth = 0.025, closed="right", boundary=-0.5, color="black") + ####10045 is the number of genes in comparison
+###Plot distribution of pi with each population as facet
+PiComps = ggplot(data = mergedDF_pi, aes(meanPi, group=fullPopName)) + 
+  geom_histogram(aes(y = stat(count)/14931, fill=fullPopName), binwidth = 0.0005, closed="right", boundary=-0.5, color="black") + ####14931 is the number of genes in comparison
   scale_fill_manual(name = "Population", values = cbPalette) + 
-  geom_vline(data = CREBBP, aes(xintercept = meanPI), colour="black", linetype="dashed", size = 2) + 
+  geom_vline(data = CREBBP, aes(xintercept = meanPi), colour="black", linetype="dashed", size = 2) + 
   geom_text(data = CREBBP, mapping = aes(x = x, y = y, label = pvalues), size = 16) +
   facet_wrap(~fullPopName, nrow = 4) +
   labs(x=expression("Mean" ~ pi ~ "(per gene)"), y = "Frequency") + 
-  #scale_x_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) +
-  #scale_y_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) +
   theme_bw()+ 
   theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 40), 
         axis.text.y = element_text(size = 40), 
-        #plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
         axis.title = element_text(size = 42),
         strip.text = element_text(size = 42),
         panel.spacing.y = unit(10, "mm"),
         legend.position = "none")
 
-#plots for windowed pi
-CREBBP_1Mb_pi = piWindowedAboutGene(dfEW_pi,"chr6", 36412372, 38531822, "1Mb", "CREBBP")
-GRB2_1Mb_pi = piWindowedAboutGene(dfEW_pi,"chr9", 4109244, 6181472, "1Mb", "GRB2")
-MKL1_1Mb_pi = piWindowedAboutGene(dfEW_pi,"chr10", 23599593, 25752076, "1Mb", "MKL1")
-PYGB_1Mb_pi = piWindowedAboutGene(dfEW_pi,"chr23", 426984, 2491240, "1Mb", "PYGB")
-CDK8_1Mb_pi = piWindowedAboutGene(dfEW_pi,"chr25", 12058947, 14178073, "1Mb", "CDK8")
-
-#####Plotting for Fst
-CREBBP_Fst$pvalues = c(paste0("p = ", round(digits = 3, x = nrow(BC_FstPerGene[BC_FstPerGene$FstNormSNPCount>=0.8919779, ])/nrow(BC_FstPerGene)), sep=""), 
-                       paste0("p = ", round(digits = 3, x = nrow(TM_FstPerGene[TM_FstPerGene$FstNormSNPCount>=0.8616547, ])/nrow(TM_FstPerGene)), sep=""), 
-                       paste0("p = ", round(digits = 3, x = nrow(AW_FstPerGene[AW_FstPerGene$FstNormSNPCount>=0.8865586, ])/nrow(AW_FstPerGene)), sep=""))
-#CREBBP_Fst$x = c(0.25, 0.25, 0.2)
-#CREBBP_Fst$y = c(240, 240, 240)
-CREBBP_Fst$x = c(0.15, 0.15, 0.15)
-CREBBP_Fst$y = c(0.10, 0.10, 0.10)
-
+###Plots for Fst
 #plot distribution with each species as facet
-#use sapply to get proportion per group
-FSTComps = ggplot(mergedDF_Fst, aes(FstNormSNPCount, group=fullPopName)) + 
-  geom_histogram(aes(y =stat(count)/sapply(PANEL, FUN=function(x) sum(count[PANEL == x])), 
-                     fill=fullPopName), binwidth = 0.025, closed="right", boundary=-0.5, color="black", fill="gray80") +
-  geom_vline(data = CREBBP_Fst, aes(xintercept = FstNormSNPCount), colour="black", linetype="dashed", size = 2) + 
-  geom_text(data = CREBBP_Fst, mapping = aes(x = x, y = y, label = pvalues), size = 16) +
+FSTComps = ggplot(mergedDF_fst %>% filter(str_detect(Comparison, 'EW_vs_')), aes(meanFst, group=fullPopName)) + 
+  geom_histogram(aes(y =stat(count)/9850), binwidth = 0.025, closed="right", boundary=-0.5, color="black", fill="gray80") +
+  geom_vline(data = CREBBP_fst %>% filter(str_detect(Comparison, 'EW_vs_')), aes(xintercept = meanFst), colour="black", linetype="dashed", size = 2) + 
+  geom_text(data = CREBBP_fst %>% filter(str_detect(Comparison, 'EW_vs_')), mapping = aes(x = x, y = y, label = pvalues), size = 16) +
   facet_wrap(~fullPopName, nrow = 3) +
   labs(x=expression("Mean" ~F[ST]~"(per gene)"), y="Frequency") + 
-  #scale_x_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) +
-  #scale_y_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) + 
   theme_bw() + 
   theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 40), 
         axis.text.y = element_text(size = 40), 
-        #plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
         axis.title = element_text(size = 42),
         strip.text = element_text(size = 42),
         panel.spacing.y = unit(10, "mm"))
 
-####Plots for derived allele counts
+###Plots for derived allele counts
 CREBBP_FixedSites$pvalues = c(paste0("p = ", round(digits = 3, x = nrow(CountPerGene_EWvAW[CountPerGene_EWvAW$FixedSites>=212, ])/nrow(CountPerGene_EWvAW)), sep=""), 
                               paste0("p = ", round(digits = 3, x = nrow(CountPerGene_EWvTM[CountPerGene_EWvTM$FixedSites>=121, ])/nrow(CountPerGene_EWvTM)), sep=""), 
                               paste0("p = ", round(digits = 3, x = nrow(CountPerGene_EWvBC[CountPerGene_EWvBC$FixedSites>=214, ])/nrow(CountPerGene_EWvBC)), sep=""))
-#uncomment for counts
-#CREBBP_FixedSites$x = c(600, 600, 600)
-#CREBBP_FixedSites$y = c(1900, 1900, 1900)
 CREBBP_FixedSites$x = c(600, 600, 600)
 CREBBP_FixedSites$y = c(0.35, 0.35, 0.35)
 
@@ -207,12 +173,10 @@ OppFixedSitesComp = ggplot(mergedDF_FixedSites, aes(FixedSites, group=fullPopNam
   geom_vline(data = CREBBP_FixedSites, aes(xintercept = FixedSites), colour="black", linetype="dashed", size = 2) + 
   geom_text(data = CREBBP_FixedSites, mapping = aes(x = x, y = y, label = pvalues), size = 16) +
   facet_wrap(~fullPopName, nrow = 3) +
-  #scale_y_continuous(breaks=seq(0,1,0.5), labels=scaleFUN, limits = c(0,1)) + 
   labs(x="Count of oppositely fixed sites (per gene)", y="Frequency") + 
   theme_bw() + 
   theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 40), 
         axis.text.y = element_text(size = 40), 
-        #plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
         axis.title = element_text(size = 42),
         strip.text = element_text(size = 42),
         panel.spacing.y = unit(10, "mm"))
@@ -225,38 +189,58 @@ print(ggarrange(x, x, FSTComps, PiComps, OppFixedSitesComp, CREBBP_1Mb_fixedSite
 dev.off()
 
 #####Find pi and fst outliers that are as extreme as CREBBP
-FSTandPiOutliers = read_delim("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/Top5perGenes_EWvsAll3.txt", delim = "\t", col_types = cols("c", "n"), col_names =c("GeneName","Occurences")) %>%
-  filter(Occurences == 3) %>%
-  mutate(Occurences = NULL,
-         pi = EW_piPerGene$meanPI[match(GeneName, EW_piPerGene$GeneName)],
-         FST_percentile_BC = BC_FstPerGene$percentile[match(GeneName, BC_FstPerGene$GeneName)]*100,
+FSTandPiOutliers = mergedDF_fst %>% 
+  filter(str_detect(Comparison, 'EW_vs_'), #only EW comparisons
+         percentile >= 0.95) %>%
+  group_by(GeneName) %>%
+  count() %>%
+  ungroup() %>%
+  filter(n>2) %>%
+  mutate(n = NULL,
+         pi = dfEW_pi$meanPi[match(GeneName, dfEW_pi$GeneName)],
+         FST_percentile_BC = split_mergedDF_fst$EW_vs_BC$percentile[match(GeneName, split_mergedDF_fst$EW_vs_BC$GeneName)]*100,
          FixedSites_percentile_BC = CountPerGene_EWvBC$percentile[match(GeneName, CountPerGene_EWvBC$GeneName)]*100,
-         FST_percentile_AW = AW_FstPerGene$percentile[match(GeneName, AW_FstPerGene$GeneName)]*100,
+         FST_percentile_AW = split_mergedDF_fst$EW_vs_AW$percentile[match(GeneName, split_mergedDF_fst$EW_vs_AW$GeneName)]*100,
          FixedSites_percentile_AW = CountPerGene_EWvAW$percentile[match(GeneName, CountPerGene_EWvAW$GeneName)]*100,
-         FST_percentile_TM = TM_FstPerGene$percentile[match(GeneName, TM_FstPerGene$GeneName)]*100,
+         FST_percentile_TM = split_mergedDF_fst$EW_vs_TM$percentile[match(GeneName, split_mergedDF_fst$EW_vs_TM$GeneName)]*100,
          FixedSites_percentile_TM = CountPerGene_EWvTM$percentile[match(GeneName, CountPerGene_EWvTM$GeneName)]*100) %>%
-  filter(pi < 0.00483) %>% #filter to genes with values of pi at least as extreme as CREBBP
-  mutate_if(is.numeric, round, digits=4) 
+  filter(pi < 4.265475e-05) 
 
-#write.table(FSTandPiOutliers, "~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FSTOutlierPiAtLeastAsExtAsCREBBP_SummaryStats.txt", sep = "\t", quote = FALSE, col.names = TRUE, row.names = FALSE)
+#write.table(FSTandPiOutliers, "~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/FSTOutlierPiAtLeastAsExtAsCREBBP_SummaryStats_updatedPi.txt", sep = "\t", quote = FALSE, col.names = TRUE, row.names = FALSE)
 
-
-
-
-####Supplementary figure 5
+####Generate supplementary figure 5
 #Comparison with EW
-mergedDF_Fst$Label = ifelse(mergedDF_Fst$percentile >= 0.95, "Top 5% Outliers","Remainder of Genes")
+BC_vs_EW = mergedDF_fst %>%
+  filter(str_detect(Comparison, 'EW_vs_BC')) %>%
+  mutate(Comparison = "BC_vs_EW",
+         fullPopName = "border collie vs\n Ethiopian wolf")
 
-EWComps_FST = ggplot(mergedDF_Fst, aes(x=FstNormSNPCount,y=SNPCount,colour=Label)) + 
+CREBBP_fst = CREBBP_fst %>%
+  filter(Comparison == "EW_vs_BC") %>%
+  mutate(Comparison = "BC_vs_EW",
+         fullPopName = "border collie vs\n Ethiopian wolf") %>%
+  rbind.data.frame(CREBBP_fst)
+  
+  
+
+supp5 = rbind.data.frame(mergedDF_fst, BC_vs_EW) %>%
+  mutate(Label = ifelse(percentile >= 0.95, "Top 5% Outliers","Remainder of Genes")) %>%
+  na.omit()
+
+
+
+EWComps_FST = ggplot(supp5 %>% filter(str_detect(Comparison, 'EW_vs')), 
+                     aes(x=meanFst,y=numSNPs,colour=Label)) + 
   geom_point() +  
   scale_colour_manual(name = "Status", values=c("blue","red")) + 
-  geom_vline(data = CREBBP_Fst, aes(xintercept = FstNormSNPCount), colour="black", linetype="dashed", size = 1) +
+  geom_vline(data = CREBBP_fst %>%
+               filter(str_detect(Comparison, 'EW_vs')), 
+             aes(xintercept = meanFst), colour="black", linetype="dashed", size = 1) +
   facet_wrap(~fullPopName, nrow = 4) +
   labs(x=expression("Mean" ~ F[ST] ~ "(per gene)"), y = "SNP Count") +  
   theme_bw() + 
   theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 40), 
         axis.text.y = element_text(size = 40), 
-        #plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
         axis.title = element_text(size = 42),
         strip.text = element_text(size = 42),
         legend.title=element_text(size=40), 
@@ -264,42 +248,19 @@ EWComps_FST = ggplot(mergedDF_Fst, aes(x=FstNormSNPCount,y=SNPCount,colour=Label
         panel.spacing.y = unit(10, "mm"))
 
 
-#Comparison with border collie
-BCComp_EW_FstPerGene = compFST("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/EW_vs_BC_allSites_rmNAN.weir.fst") %>%
-  mutate(Population = "EW") %>%
-  mutate(percentile = percent_rank(FstNormSNPCount))
 
-BCComp_TM_FstPerGene = compFST("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/BC_vs_TM_allSites_rmNAN.weir.fst") %>%
-  mutate(Population = "TM") %>%
-  mutate(percentile = percent_rank(FstNormSNPCount))
-
-BCComp_AW_FstPerGene = compFST("~/Documents/DogProject_Clare/LocalRscripts/OutliersFst/BC_vs_AW_allSites_rmNAN.weir.fst") %>%
-  mutate(Population = "AW") %>%
-  mutate(percentile = percent_rank(FstNormSNPCount))
-
-BCComp_mergedDF_Fst = rbind.data.frame(BCComp_EW_FstPerGene,BCComp_TM_FstPerGene,BCComp_AW_FstPerGene) %>%
-  mutate(chrom = gsub("chr", "", GeneSet$chrom[match(GeneName, GeneSet$AbbrevName)]),
-         fullPopName = case_when(Population == "AW" ~ "border collie vs\n Arctic wolf",
-                                 Population == "EW" ~ "border collie vs\n Ethiopian wolf",
-                                 Population == "TM" ~ "border collie vs\n tibetan mastiff"))
-
-BCComp_mergedDF_Fst$Label = ifelse(BCComp_mergedDF_Fst$percentile >= 0.95, "Top 5% Outliers","Remainder of Genes")
-
-#data frame with CREBBP Fst
-BCComp_CREBBP_Fst = BCComp_mergedDF_Fst %>%
-  filter(GeneName == "CREBBP") 
-
-
-BCComps_FST = ggplot(BCComp_mergedDF_Fst, aes(x=FstNormSNPCount,y=SNPCount,colour=Label)) + 
+BCComps_FST = ggplot(supp5 %>% filter(str_detect(Comparison, 'BC_vs')), 
+                     aes(x=meanFst,y=numSNPs,colour=Label)) + 
   geom_point() +  
   scale_colour_manual(name = "Status", values=c("blue","red")) + 
-  geom_vline(data = BCComp_CREBBP_Fst, aes(xintercept = FstNormSNPCount), colour="black", linetype="dashed", size = 1) +
+  geom_vline(data = CREBBP_fst %>%
+               filter(str_detect(Comparison, 'BC_vs')), 
+             aes(xintercept = meanFst), colour="black", linetype="dashed", size = 1) +
   facet_wrap(~fullPopName, nrow = 4) +
   labs(x=expression("Mean" ~ F[ST] ~ "(per gene)"), y = "SNP Count") +  
   theme_bw() + 
   theme(axis.text.x = element_text(hjust = 0.5, vjust = 1, size = 40), 
         axis.text.y = element_text(size = 40), 
-        #plot.title = element_text(size = 18, face = "bold", hjust = 0.5), 
         axis.title = element_text(size = 42),
         strip.text = element_text(size = 42),
         legend.title=element_text(size=40), 
