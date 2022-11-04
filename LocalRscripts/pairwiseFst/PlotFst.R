@@ -1,5 +1,6 @@
 library(tidyverse)
 library(mgsub)
+library(ggpubr)
 
 #Set working directory
 setwd("~/Documents/DogProject_Clare/LocalRscripts/pairwiseFst")
@@ -14,18 +15,31 @@ df = read_delim("~/Documents/DogProject_Clare/LocalRscripts/pairwiseFst/pairwise
          B1 = factor(B1, level=orderPops),
          B2 = factor(B2, level=orderPops)) %>%
   mutate_if(is.numeric, round, digits=3) %>% 
-  na.omit() #%>%
-  #mutate(WeightedFst = ifelse(WeightedFst==0, NA, WeightedFst))
+  na.omit() 
 
 #plot
-ggplot(df, aes(x = B1, y = B2, fill = WeightedFst)) +
+panelA = ggplot(df, aes(x = B1, y = B2, fill = WeightedFst)) +
   geom_tile() +
-  scale_fill_distiller(palette = "GnBu", name= expression('F'[ST]), limits=c(0,1), na.value = "white") +
+  scale_fill_distiller(palette = "GnBu", name= expression('Weighted F'[ST]), limits=c(0,1), na.value = "white") +
   geom_text(aes(label = ifelse(WeightedFst != 1, WeightedFst, "")), size = 10) + 
   theme_bw() + 
   labs(x= NULL, y = NULL) + 
   theme(axis.text.x = element_text(size = 30), 
         axis.text.y = element_text(size = 30), 
+        plot.title=element_text(size=32, face = "bold", hjust=0.5), 
+        axis.title=element_text(size=32), 
+        legend.title=element_text(size=32), 
+        legend.text=element_text(size=30),
+        panel.grid = element_blank())
+
+panelB = ggplot(df, aes(x = B1, y = B2, fill = MeanFst)) +
+  geom_tile() +
+  scale_fill_distiller(palette = "GnBu", name= expression('Mean F'[ST]), limits=c(0,1), na.value = "white") +
+  geom_text(aes(label = ifelse(MeanFst != 1, MeanFst, "")), size = 10) + 
+  theme_bw() + 
+  labs(x= NULL, y = NULL) + 
+  theme(axis.text.x = element_text(size = 30), 
+        axis.text.y = element_blank(), 
         plot.title=element_text(size=32, face = "bold", hjust=0.5), 
         axis.title=element_text(size=32), 
         legend.title=element_text(size=32), 
